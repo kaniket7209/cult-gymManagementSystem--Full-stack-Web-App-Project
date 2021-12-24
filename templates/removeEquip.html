@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+  
+{% block y %}
+<div class="deletetrainer" style="background-color: #bcf2cf">
+    <h1><small>Welcome</small><span class="font-italic font-weight-bold" style="color: #0d5125"> {{session.username}}</span></h1>
+<div class="form-group">
+    <div class="text-white">
+        <h1>Select the one you want to remove and respective count</h1>
+      {% from "includes/formhelpers.html" import render_field %}
+      <form method="POST" action="">
+      <div class = "dropdown">
+        <div class="form-group" >
+          {{render_field(form.name, class_="form-control")}}
+        </div>
+        <div class="form-group" >
+          {{render_field(form.count, class_="form-control")}}
+        </div>
+        </div>
+        <p><input type="submit" class="btn btn-primary" value="Submit"></p>
+        <br>
+        <br>
+        <a href="{{url_for('admin')}}"><button type="button">Go back</button></a>
+      </form>
+
+    </div>
+
+     
+
+
+{% endblock %}
