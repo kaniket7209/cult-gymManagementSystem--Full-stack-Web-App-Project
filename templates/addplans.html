@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+  
+{% block y %}
+
+<div class="Add Plans">
+
+    <h1 style="font-family: Georgia, 'Times New Roman', Times, serif;">Enter Details </h1>
+</div>
+{% from "includes/formhelpers.html" import render_field %}
+<form method="POST" action="">
+
+    <div class="form-group">
+      {{render_field(form.name, class_="form-control")}}
+    </div>
+    
+    <div class="form-group">
+      {{render_field(form.exercise, class_="form-control")}}
+    </div>
+    
+    <div class="form-group">
+      {{render_field(form.sets, class_="form-control")}}
+    </div>
+    
+    <div class="form-group">
+      {{render_field(form.reps, class_="form-control")}}
+    </div>
+    
+    
+    <p><input type="submit" class="btn btn-primary" value="Submit"></p>
+      <br>
+      <br>
+      
+
+    <a href="{{url_for('admin')}}"><button type="button">Go back</button></a>
+  </form>
+{% endblock %}

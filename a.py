@@ -12,3 +12,4 @@ while i < len(a):
 
 print(list)
 # print(tup)
+

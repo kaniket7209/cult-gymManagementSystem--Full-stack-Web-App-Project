@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+  
+{% block y %}
+<div class="view details" style="background-color: #bcf2cf">
+    <h1><small>Welcome</small><span class="font-italic font-weight-bold" style="color: #0d5125"> {{session.username}}</span></h1>
+<div class="form-group">
+    <div class="text-white">
+  
+        <a href="{{url_for('admin')}}"><button type="button">Go back</button></a>
+      </form>
+
+    </div>
+
+     
+
+
+{% endblock %}

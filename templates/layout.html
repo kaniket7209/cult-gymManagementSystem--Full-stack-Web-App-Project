@@ -1,11 +1,40 @@
 <!DOCTYPE html>
 
 <html lang="en">
-	<head>
-		<meta name="viewport" content="initial-scale=1, width=device-width">
-		<title> PEP GYM </title>
-	</head>
-	<body>
-		{% block y %}{% endblock %}
-	</body>
+
+<head>
+	<meta name="viewport" content="initial-scale=1, width=device-width">
+	<title> PEP GYM </title>
+	<style>
+		ul {
+			opacity: 1;
+			transition: opacity 500ms;
+		}
+
+		ul.hide {
+			opacity: 0;
+		}
+	</style>
+
+</head>
+
+<body>
+	{% with messages = get_flashed_messages() %}
+	{% if messages %}
+	<ul id="hideme" class=flashes>
+		{% for message in messages %}
+		<li>{{ message }}</li>
+		{% endfor %}
+	</ul>
+	{% endif %}
+	{% endwith %}
+	{% block y %}
+	{% endblock %}
+	<script>
+		setTimeout(function () {
+			document.getElementById('hideme').className = 'hide';
+		}, 2500);
+	</script>
+</body>
+
 </html>
