@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+  
+{% block y %}
+<div class="admin" style="background-color: #bcf2cf">
+    <h1><small>Welcome</small><span class="font-italic font-weight-bold" style="color: #0d5125"> {{session.username}}</span></h1>
+<div class="form-group">
+  
+    
+    <a href="{{url_for('addTrainer')}}"><button type="button">Add Trainer</button></a>
+
+    <br>
+    <br>
+</div>
+<div class="form-group">
+    <a href="{{url_for('deleteTrainer')}}"><button type="button">Delete Trainer</button></a>
+    <br>
+    <br>
+</div>
+<div class="form-group">
+    <a href="{{url_for('addReceptionalist')}}"><button type="button">Add Receptionist</button></a>
+    <br>
+    <br>
+</div>
+<div class="form-group">
+    <a href="{{url_for('deleteReceptionalist')}}"><button type="button">Delete Receptionist</button></a>
+    <br>
+    <br>
+</div>
+<div class="form-group">
+    <a href="{{url_for('addEquipment')}}"><button type="button">Add/Update Equipments</button></a>
+    <br>
+    <br>
+</div>
+<div class="form-group">
+    <a href="{{url_for('removeEquipments')}}"><button type="button">Remove Equipments</button></a>
+    <br>
+    <br>
+</div>
+<div class="form-group">
+    <a href="{{url_for('addPlans')}}"><button type="button">Add Plans</button></a>
+    <br>
+    <br>
+</div>
+<div class="form-group">
+    <a href="{{url_for('addMember')}}"><button type="button">Add Member</button></a>
+    <br>
+    <br>
+</div>
+<div class="form-group">
+    <a href="{{url_for('deleteMember')}}"><button type="button">Delete Member</button></a>
+    <br>
+    <br>
+</div>
+<div class="form-group">
+    <a href="{{url_for('details')}}"><button type="button">View Details</button></a>
+    <br>
+    <br>
+</div>
+
+
+</div>
+
+{% endblock %}
