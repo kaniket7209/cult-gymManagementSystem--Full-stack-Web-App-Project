@@ -5,40 +5,35 @@
     <h1><small>Welcome</small><span class="font-italic font-weight-bold" style="color: #0d5125">
             {{session.username}}</span></h1>
 
-
+            
     <div class="form-group">
         <div class="text-white">
 
 
-            {% for row in result %}
+            {% for row in res %}
             <table>
                 <thead>
                     <tr>
-                        <th>Username |</th>
-                        <th>Name |</th>
-                        <th>Profession- ID |</th>
-                        <th>Street |</th>
-                        <th>City |</th>
-                        <th>Phone Number |</th>
+                        <th>Equipment Name |</th>
+                        <th>Count of Equipments |</th>
+                        
                     </tr>
                 </thead>
                 <tbody>
                     <TR>
                         <TD class="c2">{{ row[0] }} </TD>
-                        <TD class="c3">{{row[2]}}</TD>
-                        <TD class="c4"><SPAN>{{row[3]}}</SPAN></TD>
-                        <TD class="c5"><SPAN>{{row[4]}}</SPAN></TD>
-                        <TD class="c6"><SPAN>{{row[5]}}</SPAN></TD>
-                        <TD class="c7"><SPAN>{{row[6]}}</SPAN></TD>
+                        <TD class="c3">{{row[1]}}</TD>
                         <br>
                     </TR>
 
 
                 </tbody>
             </table>
-
+      
             {% endfor %}
             <br>
+            
+
             <button onclick="history.back()">
                 Click here to go back
             </button>

@@ -1,37 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
+    <style>
+        body {
+            max-width: 500px;
+            margin: auto;
+            background-color: khaki;
+        }
+        #heading{
+            background-color: rgb(154, 189, 201);
+            font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        }
+        p {
+            width: 620px;
+            height: 100px;
+            padding: 10px;
+            border: 5px solid gray;
+            background-color: rgb(235, 161, 72);
+            margin: 0;
+        }
+    </style>
 </head>
+
 <body>
     {% extends "layout.html" %}
-  
-{% block y %}
-  
-<h1><strong>Welcome to Gym Management System</strong></h1>
-<p class="font-italic">The Gym Management System is to automate everything that happens
-in the gym. It is to aid and simplify the job all those who work for the gym, who train
-in the gym and who owns the gym. The database consists of daily goals and stats of
-achievements/progress of a member who trains in the gym, contact details and
-personal info of everyone, training programs that the gym offers, equipment etc.</p>
 
-   {% if session.username %}
-   <h1>Wecome Again !!! {{ session.username }} <a href="/logout">logout</a>.</h1>
-   <br>
-   <h1>Your Dashboard <a href="{{url_for('admin')}}"><button type="button">Dashboard</button></a></h1>
-   
+    {% block y %}
 
-    
-   {% else %}
-   <h1>You are not Registered <a href="/login">login</a>.</h1>
+    <h1 id="heading"><strong>Welcome to Gym Management System</strong></h1>
+    <p class="font-italic"><strong> The Gym Management System is to automate everything that happens
+            in the gym. It is to aid and simplify the job all those who work for the gym, who train
+            in the gym and who owns the gym. The database consists of daily goals and stats of
+            achievements/progress of a member who trains in the gym, contact details and
+            personal info of everyone, training programs that the gym offers, equipment etc. </strong></p>
 
-     
-   {% endif %}
+    {% if session.username and session['prof']==1 %}
+    <h1 >Wecome Again !!! {{ session.username }} <a href="/logout">logout</a>.</h1>
+    <br>
+    <h1>Admin Dashboard 
+        <a href="{{url_for('admin')}}"><button id="button" type="button">Dashboard</button></a>
+    </h1>
+    {% elif session['prof'] == 2 %}
+    <h1 >Wecome Again !!! {{ session.username }} <a href="/logout">logout</a>.</h1>
+    <h1>Trainer Dashboard 
+        <a href="{{url_for('trainerdash')}}"><button id="button" type="button">Dashboard</button></a>
+    </h1>
+
+    {% else %}
+    <h1>You are not Registered <a href="/login">login</a>.</h1>
+    {% endif %}
 
 
-{% endblock %}
+    {% endblock %}
 </body>
+
 </html>

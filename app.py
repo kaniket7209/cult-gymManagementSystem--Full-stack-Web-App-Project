@@ -1,5 +1,5 @@
 
-from flask import Flask, render_template, request, redirect, url_for,session, flash, logging
+from flask import Flask, config, render_template, request, redirect, url_for,session, flash, logging
 from wtforms import validators
 from wtforms.form import Form
 from wtforms.validators import *
@@ -15,10 +15,13 @@ mySql = MySQL(app)
 
 mydb = mysql.connector.connect(
 host="localhost",
+port = 3306,
 user="root",
 password= "",  
-database = "gymdatabase"
+database = "gymdatabase", 
+
 )
+
 
 @app.route("/")
 def home():
@@ -31,22 +34,24 @@ def login():
     if request.method == "POST":
         username = request.form['username']
         password_candidate = request.form['password']
+        mydb.reconnect()
         cur = mydb.cursor()
         cur.execute('SELECT * FROM info WHERE username = %s', [username])
         result = cur.fetchone()
         # print(result,"-----line 52")
+        # result = cur.fetchall()
         
         
 
         # data = cur.fetchone()
-        admin_name = result[0]
+        # admin_name = result[0]
         password = result[1]
         # hash = sha256_crypt.hash(password)
         # print(password, "---------",  hash) #store hash in data base inspite of original password
 
         # print(password,"--line 56")
 
-        if username == admin_name and sha256_crypt.verify(password_candidate, password):
+        if sha256_crypt.verify(password_candidate, password):
             session['logged_in'] = True
             session['username']=username
             session['prof']=result[3] #profession
@@ -54,8 +59,8 @@ def login():
             flash('You are logged in')
             if session['prof'] == 1:
                 return redirect(url_for('admin'))
-
-            return ("Admin logged in")
+            elif session['prof'] == 2:
+                return redirect(url_for('trainerdash'))
 
         else:
             error = "Invalid Login"
@@ -67,21 +72,33 @@ def login():
 def admin():
     return render_template('adminDash.html')
 
-values =[]
+@app.route('/trainerDashboard')
+def trainerdash():
+    return render_template('trainerdash.html')
 
-cur = mydb.cursor()
-cur.execute("SELECT username FROM info")
-result = cur.fetchall()
+def trainChoice():
 
-for i in result:
-    values.append(i)
-cur.close()
+    Trainerchoices =[]
+    
+    mydb.reconnect()
+    cur = mydb.cursor(buffered=True)
+    cur.execute('SELECT username FROM trainers')
+    res = cur.fetchall()
+    # print("158",res)
+    cur.close()
+    i = 0
+    while i < len(res):
+        tup = res[i][0]
+        Trainerchoices.append(tup)
+        i+=1
+    return Trainerchoices
 
-#same form for everyone
+#same form for receptionalist and trainer
 class AddTrainerForm(Form):
     # print(values,"------line 80")
+    trainerhoices = trainChoice()
     name = StringField('Name',[Length(min=1, max=100)])
-    username = StringField('Username',[InputRequired(),NoneOf(values=values, message="Username already taken, Please try another")])
+    username = StringField('Username',[InputRequired(),NoneOf(values=trainerhoices, message="Username already taken, Please try another")])
     password = PasswordField('Password',[DataRequired(),EqualTo('confirm',message='Passwords must match')])
     confirm = PasswordField('Confirm Password')
     street = StringField('Street',[Length(min=1, max=100)])
@@ -91,8 +108,8 @@ class AddTrainerForm(Form):
     
 @app.route('/addTrainer/', methods = ['GET','POST'])
 def addTrainer(): 
-    values.clear() #removes all usernames from list if present
-    form = AddTrainerForm(request.form)
+    
+    form = AddTrainerForm(request.form) 
     if request.method == 'POST' and form.validate():
         name = form.name.data
         username = form.username.data
@@ -106,22 +123,52 @@ def addTrainer():
         #first create table for trainer
         cur.execute("INSERT INTO trainers(username) VALUES(%s)", [username])
         mydb.commit()
+        
       
         
         cur.close()
         mydb.close()
         flash('You recruited a new Trainer!!', 'success')
-        return redirect(url_for('admin'))
-        # return "Trainer added"
+        if session['prof'] == 1:
+            return redirect(url_for('admin'))
+        elif session['prof'] == 2:
+            return redirect(url_for('trainerdash'))
     else:
         flash("Username already taken !!! Change it")
     return render_template('addTrainer.html',form=form)
 
-	
+
+def recep():
+    Recepchoices =[]
+    mydb.reconnect()
+    cur = mydb.cursor()
+    cur.execute('SELECT username FROM receptionalist')
+    res = cur.fetchall()
+    cur.close()
+    i = 0
+    while i < len(res):
+        tup = res[i][0]
+        Recepchoices.append(tup)
+        i+=1
+    return Recepchoices
+
+
+class AddRecepForm(Form):
+    # print(values,"------line 80")
+    Recepchoices = recep()
+    name = StringField('Name',[Length(min=1, max=100)])
+    username = StringField('Username',[InputRequired(),NoneOf(values=Recepchoices, message="Username already taken, Please try another")])
+    password = PasswordField('Password',[DataRequired(),EqualTo('confirm',message='Passwords must match')])
+    confirm = PasswordField('Confirm Password')
+    street = StringField('Street',[Length(min=1, max=100)])
+    city = StringField('City',[Length(min=1, max=100)])
+    phone = StringField('Phone',[Length(min=1, max=100)])
+
+
 @app.route('/addReceptionalist/', methods = ['GET','POST'])
 def addReceptionalist(): 
-    values.clear() #removes all usernames from list if present
-    form = AddTrainerForm(request.form)
+   
+    form = AddRecepForm(request.form)
     if request.method == 'POST' and form.validate():
         name = form.name.data
         username = form.username.data
@@ -129,6 +176,7 @@ def addReceptionalist():
         street = form.street.data
         city = form.city.data
         phone = form.phone.data
+        mydb.reconnect()
         cur = mydb.cursor(buffered=True)
         val = (name,username,password,street,city, 3, phone)
         cur.execute("INSERT INTO info(name, username, password, street, city, prof, phone) VALUES(%s, %s, %s, %s, %s, %s, %s)", val)
@@ -140,26 +188,13 @@ def addReceptionalist():
         cur.close()
         mydb.close()
         flash('You recruited a new Receptionalist!!', 'success')
-        return redirect(url_for('admin'))
-        # return "Receptionalist added"
-    # else:
-    #     flash("Username already taken !!! Change it", 'alert')
+        if session['prof'] == 1:
+            return redirect(url_for('admin'))
+        elif session['prof'] == 2:
+            return redirect(url_for('trainerdash'))
+    else:
+        flash("Username already taken !!! Change it", 'alert')
     return render_template('addTrainer.html',form=form)
-
-	
-
-print(values, "line --- 150")
-def trainChoice():
-
-    Trainerchoices =[]
-    i = 1
-    while i < len(values):
-        tup = values[i][0]
-        if tup.startswith("t"): #for trainer
-            print(tup)
-            Trainerchoices.append(tup)
-        i+=1
-    return Trainerchoices
 
 
 
@@ -171,45 +206,37 @@ class deleteForm(Form):
     else:
         username= RadioField(u'Sorry Trainer list is empty', choices=['No Trainers'])
 
-    # Trainerchoices.clear()
 
 
 @app.route('/deleteTrainer/', methods=['POST','GET'])
-def deleteTrainer():
+def deleteTrainer():    
     form = deleteForm(request.form)
     if request.method == 'POST':
         username = form.username.data
+        mydb.reconnect()
         cur = mydb.cursor()
         Trainerchoices=trainChoice()
         if not username in Trainerchoices:
-            return """Sorry {} trainer list is empty.. Kindly <a href="/addTrainer">add</a> Trainer first""".format(session['username'])
+            return """Sorry {} this trainer doesn't exist anymore.. Kindly <a href="/addTrainer">add</a> Trainer first""".format(session['username'])
         else:
             cur.execute("DELETE FROM trainers WHERE username = %s", [username])
             cur.execute("DELETE FROM info WHERE username = %s", [username])
-        mydb.commit()
-        cur.close()
-        # return redirect(url_for('admin'))
-
+            mydb.commit()
+            cur.close()
+            flash(' {} deleted from the list'.format(username))
+        if session['prof'] == 1:
+            return redirect(url_for('admin'))
+        elif session['prof'] == 2:
+            return redirect(url_for('trainerdash'))
 
     return render_template("deleteTrainer.html", form=form)    
 
 
 
-def recepdel():
-    Recepchoices =[]
-    i = 1
-    while i < len(values):
-        tup = values[i][0]
-        if tup.startswith("r"): #for receptionalist
-            # print(tup)
-            Recepchoices.append(tup)
-        i+=1
-    return Recepchoices
-
 
 
 class deleteRecepForm(Form):
-    Recepchoices= recepdel()
+    Recepchoices= recep()
     if Recepchoices:
         username= SelectField(u'Receptionalists List', choices=Recepchoices)
     else:
@@ -222,17 +249,19 @@ def deleteReceptionalist():
     form = deleteRecepForm(request.form)
     if request.method == 'POST':
         username = form.username.data
+        mydb.reconnect()
         cur = mydb.cursor()
-        Recepchoices= recepdel()
+    
+        Recepchoices= recep()
         if not username in Recepchoices:
             return  """Sorry {} Receptionalists list is empty.. Kindly <a href="/addReceptionalist">add</a> Receptionalist first""".format(session['username'])
         else:
             cur.execute("DELETE FROM receptionalist WHERE username = %s", [username])
             cur.execute("DELETE FROM info WHERE username = %s", [username])
-        mydb.commit()
-        cur.close()
-       
-        return ' {} removed <a href="/admin">Go back </a>'.format(username) 
+            mydb.commit()
+            cur.close()
+            flash("{} removed from receptionalists list".format(username))
+        # return ' {} removed <a href="/admin">Go back </a>'.format(username) 
 
 
     return render_template("deleteTrainer.html", form=form)    
@@ -244,6 +273,9 @@ class addEquipForm(Form):
 
 @app.route('/addEquipment/',methods = ["POST","GET"])
 def addEquipment():
+    Equipchoices, countChoice = equipments() 
+    list = [Equipchoices, countChoice]
+
     form = addEquipForm(request.form)
     if request.method == "POST" and form.validate():
         name = form.name.data
@@ -268,27 +300,34 @@ def addEquipment():
         mydb.commit()
         cur.close()
        
-        return redirect(url_for('admin'))
+        if session['prof'] == 1:
+            return redirect(url_for('admin'))
+        elif session['prof'] == 2:
+            return redirect(url_for('trainerdash'))
 
 
-    return render_template('addEquip.html', form = form)
+    return render_template('addEquip.html', form = form, list = list)
 
 def equipments():
     Equipchoices=[]
+    countChoice=[]
     cur = mydb.cursor()
-    cur.execute("SELECT name FROM equipments")
+    cur.execute("SELECT name , count FROM equipments")
     res = cur.fetchall()
+    print(res,"-281")
     i = 0
     while i < len(res):
         tup = res[i][0]
+        tupc = res[i][1]
         Equipchoices.append(tup)
+        countChoice.append(tupc)
         i+=1
     # print(Equipchoices,"--------263")
     cur.close()
-    return Equipchoices
+    return Equipchoices, countChoice
 
 class removeEquipForm(Form):
-    Equipchoices = equipments() 
+    Equipchoices, countchoices = equipments() 
     if Equipchoices:
         name = RadioField(u'Select equipment which you want to remove', choices=Equipchoices)
         count = IntegerField('Count',[NumberRange(min=1, max=25)])
@@ -303,6 +342,7 @@ def removeEquipments():
     if request.method == "POST" and form.validate():
         name = form.name.data
         count = form.count.data
+ 
         cur = mydb.cursor()
         cur.execute("SELECT name FROM equipments")
         equips = []
@@ -317,15 +357,28 @@ def removeEquipments():
         if name in equips:
             cur.execute("UPDATE equipments SET count = count-%s WHERE name = %s", (count, name))
             flash('{} {} deleted'.format(count, name))
+
         else:
-            return ("""Sorry {} No more equipments left <a href="/addPlans">Add</a> it first""".format(session['username']))
+            return ("""Sorry {} No more equipments left <a href="/addEquipment">Add</a> it first""".format(session['username']))
         mydb.commit()
         cur.close()
-        return redirect(url_for('admin'))
+        if session['prof'] == 1:
+            return redirect(url_for('admin'))
+        elif session['prof'] == 2:
+            return redirect(url_for('trainerdash'))
 
 
     return render_template('removeEquip.html', form = form)
 
+@app.route('/viewEquipments')
+def viewEquip():
+    mydb.reconnect()
+    cur = mydb.cursor()
+    cur.execute("SELECT * FROM equipments")
+    res = cur.fetchall()
+    print(res, "-----------377")
+    cur.close()
+    return render_template('viewEquip.html', res = res)
 
 def planChoices():
     planChoices = []
@@ -367,19 +420,38 @@ def addPlans():
         mydb.commit()
         cur.close()
         flash('{} added'.format(name))
-        return redirect(url_for('admin'))
+        if session['prof'] == 1:
+            return redirect(url_for('admin'))
+        elif session['prof'] == 2:
+            return redirect(url_for('trainerdash'))
 	
 
     return render_template('addplans.html', form = form)
 
 
 
+def member():
+    memberchoices = []
+    mydb.reconnect()
+    cur = mydb.cursor()
+    cur.execute("SELECT DISTINCT username FROM members")
+    res = cur.fetchall()
+    i = 0
+    while i < len(res):
+        tup = res[i][0]
+        memberchoices.append(tup)
+        i += 1
+
+    return memberchoices
+
+
 
 class addMemberForm(Form):
     planChoices = planChoices() 
+    memberchoices = member()
     TrainerChoices = trainChoice()
     name = StringField('Name',[Length(min=1, max=50)])
-    username = StringField('Username',[InputRequired(),NoneOf(values=values, message="Username already taken, Please try another")])
+    username = StringField('Username',[InputRequired(),NoneOf(values=memberchoices, message="Username already taken, Please try another")])
     password = PasswordField('Password',[DataRequired(),EqualTo('confirm',message='Passwords must match')])
     confirm = PasswordField('Confirm Password')
     street = StringField('Street',[Length(min=1, max=100)])
@@ -402,6 +474,7 @@ def addMember():
         phone= form.city.data
         plan = form.plan.data
         trainer = form.trainer.data
+        mydb.reconnect()
         cur = mydb.cursor()
         val = (name,username,password,street,city, 4, phone) # member profession = 4
         cur.execute("INSERT INTO info(name, username, password, street, city, prof, phone) VALUES(%s, %s, %s, %s, %s, %s, %s)", val)
@@ -409,8 +482,10 @@ def addMember():
         mydb.commit()
         cur.close()
         flash('{} added'.format(name))
-        if (session['prof'] == 1):
+        if session['prof'] == 1:
             return redirect(url_for('admin'))
+        elif session['prof'] == 2:
+            return redirect(url_for('trainerdash'))
         else:
             return redirect(url_for('login'))
 
@@ -418,18 +493,7 @@ def addMember():
     return render_template('addMember.html', form=form)
 
 
-def member():
-    memberchoices = []
-    cur = mydb.cursor()
-    cur.execute("SELECT DISTINCT username FROM members")
-    res = cur.fetchall()
-    i = 0
-    while i < len(res):
-        tup = res[i][0]
-        memberchoices.append(tup)
-        i += 1
 
-    return memberchoices
 
 class deleteMemberform(Form):
     memberchoices = member()
@@ -445,6 +509,7 @@ def deleteMember():
     form = deleteMemberform(request.form)
     if request.method == "POST" and form.validate():
         name  = form.name.data
+        mydb.reconnect()
         cur = mydb.cursor()
         memberchoices = member()
         if not name in memberchoices:
@@ -455,7 +520,10 @@ def deleteMember():
         mydb.commit()
         cur.close()
         flash('{} deleted'.format(name))
-        return redirect(url_for('admin'))
+        if session['prof'] == 1:
+            return redirect(url_for('admin'))
+        elif session['prof'] == 2:
+            return redirect(url_for('trainerdash'))
 
 
     return render_template('deleteMember.html', form=form)
@@ -464,19 +532,129 @@ def deleteMember():
 
 @app.route('/viewdetails')
 def details():
-    cur = mydb.cursor()
-    cur.execute("SELECT username FROM info WHERE username != %s", [session['username']])
+    
+    mydb.reconnect()
+    cur = mydb.cursor(buffered=True)
+    cur.execute("SELECT * FROM info WHERE username != %s", [session['username']])
     result = cur.fetchall()
+    # for row in result:
+    #     print("username ", row[0])
+    #     print("name ", row[2])
+    #     print("Profession ", row[3])
+    #     print("street ", row[4])
+    #     print("city ", row[5])
+    #     print("phone ", row[6])
+
+      
+    cur.close()
     return render_template('details.html', result = result)
 
 
+@app.route('/viewplans/')
+def viewplans():
+    mydb.reconnect()
+    cur= mydb.cursor()
+    cur.execute("SELECT * FROM plans")
+    result = cur.fetchall()
 
+    cur.close()
+    return render_template('viewplans.html', result = result)
+
+
+
+class delplanForm(Form):
+    planChoices = planChoices()
+    name = RadioField(u'Plans list',choices=planChoices)
+ 
+@app.route('/delplans/', methods = ['POST', 'GET'])
+def delplans():
+    form = delplanForm(request.form)
+    if request.method == "POST":
+        name = form.name.data
+        planChoice= planChoices()
+       
+        if not name in planChoice:
+            flash('Sorry this plan is not available')
+            # return """Sorry {} plan list is empty.. Kindly <a href="/addPlans">add</a> first""".format(session['username'])
+        else:
+            mydb.reconnect()
+            cur = mydb.cursor()
+            cur.execute("DELETE FROM plans WHERE name = %s", [name])
+            mydb.commit()
+            cur.close()
+            flash('{} deleted'.format(name))
+    
+       
+        if session['prof'] == 1:
+            return redirect(url_for('admin'))
+        elif session['prof'] == 2:
+            return redirect(url_for('trainerdash'))
+	
+
+    return render_template('delplans.html', form = form)
+
+
+class editprofileForm(Form):
+
+    Recepchoices = recep()
+    name = StringField('Name',[Length(min=1, max=100)])
+    username = StringField('Username',[InputRequired(),NoneOf(values=Recepchoices, message="Username already taken, Please try another")])
+    street = StringField('Street',[Length(min=1, max=100)])
+    city = StringField('City',[Length(min=1, max=100)])
+    phone = StringField('Phone',[Length(min=1, max=100)])
+
+#edit profile not working
+
+@app.route('/editprofile/', methods = ['POST','GET'])
+def editprofile():
+    form = editprofileForm(request.form)
+    if request.method == 'POST' and form.validate():
+        name = form.name.data
+        username = form.username.data
+        street = form.street.data
+        city = form.street.data
+        phone = form.phone.data
+        mydb.reconnect()
+        cur = mydb.cursor()
+        cur.execute("UPDATE info SET name = %s ,street = %s ,city = %s ,phone = %s WHERE username = %s", (name,street,city,phone, username))
+        mydb.commit()
+        cur.close()
+        flash('Profile Updated')
+        if session['prof'] == 1:
+            return redirect(url_for('admin'))
+        elif session['prof'] == 2:
+            return redirect(url_for('trainerdash'))
+
+    
+    return render_template('editprofile.html', form = form)
+
+class changepasswordForm(Form):
+    password = PasswordField('Password',[DataRequired(),EqualTo('confirm',message='Passwords must match')])
+    confirm = PasswordField('Confirm Password')
+   
+
+@app.route('/changepass/', methods = ['POST','GET'])
+def changepass():
+    form = changepasswordForm(request.form)
+    if request.method == 'POST' and form.validate():
+        password = sha256_crypt.encrypt(str(form.password.data))
+        mydb.reconnect()
+        cur = mydb.cursor()
+        cur.execute("UPDATE info SET password = %s WHERE username = %s ",(password,session['username']))
+        mydb.commit()
+        cur.close()
+        if session['prof'] == 1:
+            return redirect(url_for('admin'))
+        elif session['prof'] == 2:
+            return redirect(url_for('trainerdash'))
+        
+    return render_template('changepassword.html', form= form)
 
 
 @app.route("/logout/")
 def logout():
     session["username"] = None
-    return redirect("/")
+    return redirect("/login")
 
 if __name__ == "__main__":
     app.secret_key = "232422"

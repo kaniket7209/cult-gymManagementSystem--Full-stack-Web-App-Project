@@ -1,26 +1,34 @@
 {% extends "layout.html" %}
-  
+
 {% block y %}
 
 <div class="Add Equipments">
 
-    <h1 style="font-family: Georgia, 'Times New Roman', Times, serif;">Enter Details </h1>
+  <h1 style="font-family: Georgia, 'Times New Roman', Times, serif;">Enter Details </h1>
 </div>
 {% from "includes/formhelpers.html" import render_field %}
 <form method="POST" action="">
 
-    <div class="form-group">
-      {{render_field(form.name, class_="form-control")}}
-    </div>
-    <div class="form-group">
-      {{render_field(form.count, class_="form-control")}}
-    </div>
-    
-    <p><input type="submit" class="btn btn-primary" value="Submit"></p>
-      <br>
-      <br>
-      
 
-    <a href="{{url_for('admin')}}"><button type="button">Go back</button></a>
-  </form>
+  <div class="form-group">
+    {{render_field(form.name, class_="form-control")}}
+  </div>
+  <div class="form-group">
+    {{render_field(form.count, class_="form-control")}}
+  </div>
+
+  <p><input type="submit" class="btn btn-primary" value="Submit"></p>
+  <br>
+  <br>
+  <div id="equip" style="background-color: rgb(143, 141, 216);">
+    <h2><strong>Equipments already available :</strong> </h2>
+
+    <br>
+    <TD class="c1">{{ list[0] }} </TD> <br>
+    <TD class="c2">{{ list[1] }} </TD> <br> <br>
+  </div>
+</form>
+<button onclick="history.back()">
+  Click here to go back
+</button>
 {% endblock %}

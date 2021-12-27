@@ -5,7 +5,7 @@
     <h1><small>Welcome</small><span class="font-italic font-weight-bold" style="color: #0d5125"> {{session.username}}</span></h1>
 <div class="form-group">
     <div class="text-white">
-        <h1>Select the member you want to remove</h1>
+        <h1>Select the Plan you want to remove</h1>
       {% from "includes/formhelpers.html" import render_field %}
       <form method="POST" action="">
       <div class = "dropdown">
@@ -20,8 +20,10 @@
         <a href="{{url_for('admin')}}"><button type="button">Go back</button></a>
         <br>
         <br><br>
-        <a class= delete href="{{url_for('addMember')}}"><button type="button">Add member</button></a>
       </form>
+      <button onclick="history.back()">
+        Click here to go back
+      </button>
 
     </div>
 
