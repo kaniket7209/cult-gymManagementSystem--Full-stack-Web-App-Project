@@ -16,13 +16,14 @@
         <p><input type="submit" class="btn btn-primary" value="Submit"></p>
         <br>
         <br>
-        
-        <a href="{{url_for('admin')}}"><button type="button">Go back</button></a>
-        <br>
-        <br><br>
+      
+      
         <a class= delete href="{{url_for('addMember')}}"><button type="button">Add member</button></a>
       </form>
-
+      <br>
+      <button onclick="history.back()">
+        Click here to go back
+    </button>
     </div>
 
      

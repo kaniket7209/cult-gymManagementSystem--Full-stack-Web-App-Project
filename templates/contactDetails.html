@@ -14,20 +14,19 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Plan Name |</th>
-                        <th>Duration |</th>
-                        <th>Price |</th>
-                     
-
+                        <th>Username|</th>
+                        <th>Name |</th>
+                        <th>Contact Number |</th>
+                        
+                        
                     </tr>
                 </thead>
                 <tbody>
                     <TR>
                         <TD class="c2">{{ row[0] }} </TD>
-                        <TD class="c3">{{row[1]}} months</TD>
-                        <TD class="c4"><SPAN> Rs {{row[2]}}/-</SPAN></TD>
+                        <TD class="c3">{{row[1]}}</TD>
+                        <TD class="c4"><SPAN>{{row[2]}}</SPAN></TD>
                       
-
                         <br>
                     </TR>
 
@@ -37,11 +36,11 @@
 
             {% endfor %}
             <br>
-
-            </form>
             <button onclick="history.back()">
                 Click here to go back
             </button>
+            </form>
+
         </div>
 
 

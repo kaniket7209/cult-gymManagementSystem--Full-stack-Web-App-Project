@@ -1,5 +1,5 @@
 
-from flask import Flask, config, render_template, request, redirect, url_for,session, flash, logging
+from flask import Flask, render_template, request, redirect, url_for,session, flash
 from wtforms import validators
 from wtforms.form import Form
 from wtforms.validators import *
@@ -28,21 +28,29 @@ def home():
     return render_template("home.html")
 
 
+
+class loginForm(Form):
+   
+    username = StringField('Username',[InputRequired()])
+    password = PasswordField('Password',[DataRequired()])
+
+
+
 @app.route("/login", methods = ["POST","GET"])
 def login():
-
+    form = loginForm(request.form)
     if request.method == "POST":
-        username = request.form['username']
-        password_candidate = request.form['password']
+        username = form.username.data
+        password_candidate = form.password.data
         mydb.reconnect()
         cur = mydb.cursor()
         cur.execute('SELECT * FROM info WHERE username = %s', [username])
         result = cur.fetchone()
-        # print(result,"-----line 52")
+        print(result,"-----line 52")
         # result = cur.fetchall()
         
         
-
+        name = result[0]
         # data = cur.fetchone()
         # admin_name = result[0]
         password = result[1]
@@ -51,22 +59,26 @@ def login():
 
         # print(password,"--line 56")
 
-        if sha256_crypt.verify(password_candidate, password):
+        if username == name and sha256_crypt.verify(password_candidate, password):
             session['logged_in'] = True
             session['username']=username
             session['prof']=result[3] #profession
-            cur.close()
+            
             flash('You are logged in')
             if session['prof'] == 1:
                 return redirect(url_for('admin'))
             elif session['prof'] == 2:
                 return redirect(url_for('trainerdash'))
+            elif session['prof'] == 3:
+                return redirect(url_for('recepdash'))
+            elif session['prof'] == 4:
+                return redirect(url_for('memberdash'))
 
         else:
-            error = "Invalid Login"
-            return error
-
-    return render_template("login.html")
+            flash('Invalid Login')
+            return redirect(url_for('login'))
+        cur.close()
+    return render_template("login.html", form = form)
 
 @app.route('/admin')
 def admin():
@@ -75,6 +87,16 @@ def admin():
 @app.route('/trainerDashboard')
 def trainerdash():
     return render_template('trainerdash.html')
+
+
+@app.route('/recepDash')
+def recepdash():
+    return render_template('recepdash.html')
+
+@app.route('/memberDash')
+def memberdash():
+    
+    return render_template('memberdash.html')
 
 def trainChoice():
 
@@ -383,7 +405,7 @@ def viewEquip():
 def planChoices():
     planChoices = []
     cur= mydb.cursor()
-    cur.execute("SELECT DISTINCT name FROM plans")
+    cur.execute("SELECT DISTINCT name FROM workoutplans")
     res = cur.fetchall()
     print(res, "----------line 308")
     cur.close()
@@ -397,18 +419,16 @@ def planChoices():
 
 class addPlanForm(Form):
     name = StringField('Plan name',[Length(min=1, max=50)])
-    exercise = StringField('Exercise',[Length(min=1, max=50)])
-    sets = IntegerField('Number of Sets',[NumberRange(min=1, max=100)])
-    reps = IntegerField('Repetitions',[NumberRange(min=1, max=500)])
+    duration = IntegerField('Duration (in month)',[NumberRange(min=1, max=36)])
+    price = IntegerField('Price',[NumberRange(min=1, max=60000)])
 
 @app.route('/addPlans/', methods = ['POST', 'GET'])
 def addPlans():
     form = addPlanForm(request.form)
     if request.method == "POST":
         name = form.name.data
-        exercise = form.exercise.data
-        sets = form.sets.data
-        reps = form.reps.data
+        duration = form.duration.data
+        price = form.price.data
         cur = mydb.cursor()
         planChoice= planChoices()
         if name.lower() in planChoice:
@@ -416,7 +436,7 @@ def addPlans():
             Sorry😢 this plan already exists ..Create a <a href="/addPlans">new</a> one""".format(session['username'])
             
         else:
-            cur.execute("INSERT INTO plans(name, exercise, sets, reps) VALUES(%s, %s, %s, %s)", (name, exercise, sets, reps))
+            cur.execute("INSERT INTO workoutplans(name, duration, price) VALUES(%s, %s, %s)", (name, duration, price))
         mydb.commit()
         cur.close()
         flash('{} added'.format(name))
@@ -471,7 +491,7 @@ def addMember():
         password = sha256_crypt.encrypt(str(form.password.data))
         street = form.street.data
         city = form.city.data
-        phone= form.city.data
+        phone= form.phone.data
         plan = form.plan.data
         trainer = form.trainer.data
         mydb.reconnect()
@@ -486,6 +506,8 @@ def addMember():
             return redirect(url_for('admin'))
         elif session['prof'] == 2:
             return redirect(url_for('trainerdash'))
+        elif session['prof'] == 3:
+            return redirect(url_for('recepdash'))
         else:
             return redirect(url_for('login'))
 
@@ -524,6 +546,8 @@ def deleteMember():
             return redirect(url_for('admin'))
         elif session['prof'] == 2:
             return redirect(url_for('trainerdash'))
+        elif session['prof'] == 3:
+            return redirect(url_for('recepdash'))
 
 
     return render_template('deleteMember.html', form=form)
@@ -554,7 +578,7 @@ def details():
 def viewplans():
     mydb.reconnect()
     cur= mydb.cursor()
-    cur.execute("SELECT * FROM plans")
+    cur.execute("SELECT * FROM workoutplans")
     result = cur.fetchall()
 
     cur.close()
@@ -571,7 +595,7 @@ def delplans():
     form = delplanForm(request.form)
     if request.method == "POST":
         name = form.name.data
-        planChoice= planChoices()
+        planChoice= planChoices() 
        
         if not name in planChoice:
             flash('Sorry this plan is not available')
@@ -579,11 +603,11 @@ def delplans():
         else:
             mydb.reconnect()
             cur = mydb.cursor()
-            cur.execute("DELETE FROM plans WHERE name = %s", [name])
+            cur.execute("DELETE FROM workoutplans WHERE name = %s", [name])
             mydb.commit()
             cur.close()
             flash('{} deleted'.format(name))
-    
+     
        
         if session['prof'] == 1:
             return redirect(url_for('admin'))
@@ -598,7 +622,7 @@ class editprofileForm(Form):
 
     Recepchoices = recep()
     name = StringField('Name',[Length(min=1, max=100)])
-    username = StringField('Username',[InputRequired(),NoneOf(values=Recepchoices, message="Username already taken, Please try another")])
+   
     street = StringField('Street',[Length(min=1, max=100)])
     city = StringField('City',[Length(min=1, max=100)])
     phone = StringField('Phone',[Length(min=1, max=100)])
@@ -610,13 +634,13 @@ def editprofile():
     form = editprofileForm(request.form)
     if request.method == 'POST' and form.validate():
         name = form.name.data
-        username = form.username.data
+      
         street = form.street.data
         city = form.street.data
         phone = form.phone.data
         mydb.reconnect()
         cur = mydb.cursor()
-        cur.execute("UPDATE info SET name = %s ,street = %s ,city = %s ,phone = %s WHERE username = %s", (name,street,city,phone, username))
+        cur.execute("UPDATE info SET name = %s ,street = %s ,city = %s ,phone = %s WHERE username = %s", (name,street,city,phone, session['username']))
         mydb.commit()
         cur.close()
         flash('Profile Updated')
@@ -624,6 +648,10 @@ def editprofile():
             return redirect(url_for('admin'))
         elif session['prof'] == 2:
             return redirect(url_for('trainerdash'))
+        elif session['prof'] == 3:
+            return redirect(url_for('recepdash'))
+        elif session['prof'] == 4:
+            return redirect(url_for('memberdash'))
 
     
     return render_template('editprofile.html', form = form)
@@ -647,8 +675,139 @@ def changepass():
             return redirect(url_for('admin'))
         elif session['prof'] == 2:
             return redirect(url_for('trainerdash'))
-        
+        elif session['prof'] == 3:
+            return redirect(url_for('recepdash'))
+        elif session['prof'] == 4:
+                return redirect(url_for('memberdash'))
+
     return render_template('changepassword.html', form= form)
+
+@app.route('/myprofile/')
+def profile():
+    mydb.reconnect()
+    cur = mydb.cursor(buffered=True)
+    cur.execute("SELECT * FROM info WHERE username = %s", [session['username']])
+    result = cur.fetchall()
+    cur.close()
+    return render_template('profile.html', result=result)
+
+@app.route('/contactinfo/')
+def contactdetails():
+    mydb.reconnect()
+    cur = mydb.cursor()
+    cur.execute("SELECT username, name , phone FROM info ")
+    result = cur.fetchall()
+    print(result,"--------680")
+    cur.close()
+    return render_template('contactDetails.html', result=result)
+
+
+@app.route('/myTrainer/')
+def mytrainer():
+    mydb.reconnect()
+    cur= mydb.cursor()
+    cur.execute("SELECT trainer FROM members WHERE username = %s",[session['username']])
+    result = cur.fetchall()
+    print(result[0][0],"=--------712")
+    myTrainer= result[0][0]
+    cur.execute("SELECT username, name ,street, city, phone FROM info WHERE username = %s",[myTrainer])
+    data = cur.fetchall()
+    print(data,"------------------716")
+
+    cur.close()
+    return render_template('mytrainerinfo.html', data = data)
+
+
+@app.route('/myplan/')
+def myplan():
+    mydb.reconnect()
+    cur= mydb.cursor()
+    cur.execute("SELECT plan FROM members WHERE username = %s",[session['username']])
+    result = cur.fetchall()
+    print(result[0][0],"=--------728")
+    myPlan= result[0][0]
+    cur.execute("SELECT  name ,duration, price FROM workoutplans WHERE name = %s",[myPlan])
+    data = cur.fetchall()
+    print(data,"------------------732")
+
+    cur.close()
+
+    return render_template('myplan.html', data = data)
+
+@app.route('/membersinfo')
+def membersinfo():
+    mydb.reconnect()
+    cur= mydb.cursor()
+    cur.execute("SELECT username, plan FROM members WHERE trainer = %s",[session['username']])
+    result = cur.fetchall()
+    print(result,"=--------744")
+    members = []
+    i = 0
+    while i < len(result):
+        tup = result[i][0]    
+        members.append(tup)
+        i+=1
+    # print(members,"============752")
+    membersdata = []
+    if members:
+        for i in members:
+            print(i)
+            cur.execute("SELECT username, name, street, city, phone FROM info WHERE username = %s  ", [i])
+            data = cur.fetchall()
+            # print(data,"--758")
+            membersdata.append(data)
+            # print(membersdata,"--758")
+            
+    else:
+        flash('Sorry trainer your member list is empty')
+        return redirect(url_for('trainerdash'))
+    i = 0
+    list = []
+    while i < len(membersdata):
+        tup = membersdata[i][0]
+    
+        list.append(tup)
+        i+=1
+
+    
+    print(result,"---------773")
+    cur.close()
+
+    return render_template('memberinfo.html', list = list, result = result)
+
+
+def member():
+    memberchoices = []
+    mydb.reconnect()
+    cur = mydb.cursor()
+    # cur.execute("SELECT  username FROM members WHERE trainer = %s",["trainer2"])
+    cur.execute("SELECT  username FROM members WHERE trainer = %s",[session.username])
+    res = cur.fetchall()
+    i = 0
+    while i < len(res):
+        tup = res[i][0]
+        memberchoices.append(tup)
+        i += 1
+    print(memberchoices)
+    return memberchoices
+
+
+
+
+class dailyReportForm(Form):
+    memberchoices = member()
+    name = RadioField(u'Select member',choices=memberchoices)
+    exercise = StringField('Exercise Info',[Length(min=1, max=100)])
+    # sets = IntegerField('Sets',[NumberRange(min=1, max=25)])
+    # reps = IntegerField('Reps',[NumberRange(min=1, max=25)])
+
+@app.route('/dailyReport/')
+def dailyReport():
+    form = dailyReportForm(request.form) 
+    return render_template('dailyreport.html', form = form)
+
+
+
 
 
 @app.route("/logout/")

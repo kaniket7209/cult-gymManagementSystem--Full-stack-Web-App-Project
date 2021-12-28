@@ -50,6 +50,16 @@
     <h1>Trainer Dashboard 
         <a href="{{url_for('trainerdash')}}"><button id="button" type="button">Dashboard</button></a>
     </h1>
+    {% elif session['prof'] == 3 %}
+    <h1 >Wecome Again !!! {{ session.username }} <a href="/logout">logout</a>.</h1>
+    <h1>Receptionist Dashboard 
+        <a href="{{url_for('recepdash')}}"><button id="button" type="button">Dashboard</button></a>
+    </h1>
+    {% elif session['prof'] == 4 %}
+    <h1 >Wecome Again !!! {{ session.username }} <a href="/logout">logout</a>.</h1>
+    <h1>Member Dashboard 
+        <a href="{{url_for('memberdash')}}"><button id="button" type="button">Dashboard</button></a>
+    </h1>
 
     {% else %}
     <h1>You are not Registered <a href="/login">login</a>.</h1>
