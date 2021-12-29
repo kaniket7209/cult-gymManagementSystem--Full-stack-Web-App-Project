@@ -1,0 +1,96 @@
+{% extends "layout.html" %}
+
+{% block y %}
+<h1><small>Welcome</small><span class="font-italic font-weight-bold" style="color: #0d5125">
+        {{session.username}}</span></h1>
+        <h2>Your members username </h2>
+<div id="membersList" style="font-family: cursive; background-color: rgb(137, 204, 137);">
+    {% for row in list %}
+    <h4>{{row}}</h4>
+
+    {% endfor %}
+
+</div>
+<div class="Edit profile">
+    <html>
+
+    <head>
+        <title>DAILY result</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+        <style>
+            .input-wrapper div {
+                margin-bottom: 10px;
+
+            }
+
+            .remove-input {
+                margin-top: 10px;
+                margin-left: 15px;
+                vertical-align: text-bottom;
+            }
+
+            .add-input {
+                margin-top: 10px;
+                margin-left: 10px;
+                vertical-align: text-bottom;
+            }
+
+            img {
+                width: 45px;
+                height: 45px;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div style="width:100%;padding:50px;background-color: #88a84b;">
+            <h2>UPDATE DAILY RESULT</h2>
+            <form method="POST">
+                <div class="input-wrapper">
+
+                    <div>
+                        <h2>Update Form : </h2>
+                        <input style="width: auto;" type="text" name="field[]" placeholder="Enter member username"
+                            value="" /><br>
+                        <input type="text" name="field[]" placeholder="Enter member Name" value="" /><br>
+                        <input style="width: 230px;" type="text" name="field[]"
+                            placeholder="Enter exercise done by this member" value="" /><br>
+                        <input style="width: 200px;" type="text" name="field[]"
+                            placeholder="Enter sets done for this exercise" value="" /><br>
+                        <input style="width: 200px;" type="text" name="field[]"
+                            placeholder="Enter reps done for this exercise " value="" /><br>
+
+
+                        <a href="javascript:void(0);" class="add-input" title="Add input"><img
+                                src="/static/img/add.png" /></a>
+                    </div>
+                </div>
+                <input type="submit" name="Submit">
+            </form>
+
+        </div>
+        <script>
+            $(document).ready(function () {
+                var max_input_fields = 10;
+                var add_input = $('.add-input');
+                var input_wrapper = $('.input-wrapper');
+                var new_input = '<div> <input style="width: auto;" type="text" name="field[]" placeholder="Enter member username" value=""/><br>       <input type="text" name="field[]" placeholder="Enter member Name" value=""/><br>                <input style="width: 230px;" type="text" name="field[]" placeholder="Enter exercise done by this member" value=""/><br>                <input style="width: 200px;" type="text" name="field[]" placeholder="Enter sets done for this exercise" value=""/><br>                <input style="width: 200px;" type="text" name="field[]" placeholder="Enter reps done for this exercise " value=""/><br><a href="javascript:void(0);" class="remove-input" title="Remove input"><img src="/static/img/remove.png"/></a></div>';
+                var add_input_count = 1;
+                $(add_input).click(function () {
+                    if (add_input_count < max_input_fields) {
+                        add_input_count++;
+                        $(input_wrapper).append(new_input);
+                    }
+                });
+                $(input_wrapper).on('click', '.remove-input', function (e) {
+                    e.preventDefault();
+                    $(this).parent('div').remove();
+                    add_input_count--;
+                });
+            });
+        </script>
+    </body>
+
+    </html>
+
+    {% endblock %}

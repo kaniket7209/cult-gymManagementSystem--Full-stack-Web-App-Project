@@ -1,11 +1,11 @@
 
+import numpy as np
 from flask import Flask, render_template, request, redirect, url_for,session, flash
 from wtforms import validators
 from wtforms.form import Form
 from wtforms.validators import *
 from flask_mysqldb import MySQL
 import mysql.connector
-
 from wtforms.fields import *
 from credentials import *
 from passlib.hash import sha256_crypt
@@ -636,7 +636,7 @@ def editprofile():
         name = form.name.data
       
         street = form.street.data
-        city = form.street.data
+        city = form.city.data
         phone = form.phone.data
         mydb.reconnect()
         cur = mydb.cursor()
@@ -724,11 +724,11 @@ def myplan():
     cur= mydb.cursor()
     cur.execute("SELECT plan FROM members WHERE username = %s",[session['username']])
     result = cur.fetchall()
-    print(result[0][0],"=--------728")
+    # print(result[0][0],"=--------728")
     myPlan= result[0][0]
     cur.execute("SELECT  name ,duration, price FROM workoutplans WHERE name = %s",[myPlan])
     data = cur.fetchall()
-    print(data,"------------------732")
+    # print(data,"------------------732")
 
     cur.close()
 
@@ -740,7 +740,7 @@ def membersinfo():
     cur= mydb.cursor()
     cur.execute("SELECT username, plan FROM members WHERE trainer = %s",[session['username']])
     result = cur.fetchall()
-    print(result,"=--------744")
+    # print(result,"=--------744")
     members = []
     i = 0
     while i < len(result):
@@ -776,36 +776,52 @@ def membersinfo():
     return render_template('memberinfo.html', list = list, result = result)
 
 
-def member():
-    memberchoices = []
+
+@app.route('/dailyReportsUpdate', methods = ['POST','GET'])
+def updateDailyReport():
+
     mydb.reconnect()
-    cur = mydb.cursor()
-    # cur.execute("SELECT  username FROM members WHERE trainer = %s",["trainer2"])
-    cur.execute("SELECT  username FROM members WHERE trainer = %s",[session.username])
-    res = cur.fetchall()
+    cur= mydb.cursor()
+    cur.execute("SELECT username FROM members WHERE trainer = %s",[session['username']])
+    result = cur.fetchall()
     i = 0
-    while i < len(res):
-        tup = res[i][0]
-        memberchoices.append(tup)
-        i += 1
-    print(memberchoices)
-    return memberchoices
+    lists = []
+    while i < len(result):
+        tup = result[i][0]
+    
+        lists.append(tup)
+        i+=1
+    print(lists,"=--------801")
+    if request.method == "POST":
+        
+        my_list = request.form.getlist('field[]')
+        n = len(my_list)/5 #where 5 is a no of input fields
+        print(my_list,"--------798",length)
+      
+        split = np.array_split(my_list,n)
+        for arr in split:
+            print(arr)
+
+
+           
 
 
 
 
-class dailyReportForm(Form):
-    memberchoices = member()
-    name = RadioField(u'Select member',choices=memberchoices)
-    exercise = StringField('Exercise Info',[Length(min=1, max=100)])
-    # sets = IntegerField('Sets',[NumberRange(min=1, max=25)])
-    # reps = IntegerField('Reps',[NumberRange(min=1, max=25)])
 
-@app.route('/dailyReport/')
-def dailyReport():
-    form = dailyReportForm(request.form) 
-    return render_template('dailyreport.html', form = form)
 
+
+        print (tuple(lists),"------------823")
+
+        # if username in tuple(list):
+        #     flash("Matched")
+        # else:
+        #     flash("Check your member username .. It's incorrect")
+        cur.close()
+        # print(name)
+
+
+    return render_template("dailyUpdate.html", list = lists)
 
 
 
