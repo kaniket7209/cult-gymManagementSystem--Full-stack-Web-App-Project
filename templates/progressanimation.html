@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+
+{% block y %}
+<h1><small>Welcome</small><span class="font-italic font-weight-bold" style="color: #0d5125">
+        {{session.username}}</span></h1>
+<h2>Your members username </h2>
+<div id="membersList" style="font-family: cursive; background-color: rgb(137, 204, 137);">
+    {% for row in list %}
+    <h4>{{row}}</h4>
+
+    {% endfor %}
+
+</div>
+<div class="View Progress Report ">
+
+    <h1 style="font-family: Georgia, 'Times New Roman', Times, serif;">Enter username of your member for whom you want to see the report
+    </h1>
+</div>
+{% from "includes/formhelpers.html" import render_field %}
+<form method="POST" action="">
+    <div class="form-group">
+        {{render_field(form.username, class_="form-control")}}
+    </div>
+
+    <p><input type="submit" class="btn btn-primary" value="Submit"></p>
+    <br>
+    <br>
+
+
+</form>
+<button onclick="history.back()">
+    Click here to go back
+</button>
+{% endblock %}

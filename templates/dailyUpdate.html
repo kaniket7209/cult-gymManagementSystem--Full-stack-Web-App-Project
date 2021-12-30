@@ -3,7 +3,7 @@
 {% block y %}
 <h1><small>Welcome</small><span class="font-italic font-weight-bold" style="color: #0d5125">
         {{session.username}}</span></h1>
-        <h2>Your members username </h2>
+<h2>Your members username </h2>
 <div id="membersList" style="font-family: cursive; background-color: rgb(137, 204, 137);">
     {% for row in list %}
     <h4>{{row}}</h4>
@@ -51,14 +51,13 @@
                     <div>
                         <h2>Update Form : </h2>
                         <input style="width: auto;" type="text" name="field[]" placeholder="Enter member username"
-                            value="" /><br>
-                        <input type="text" name="field[]" placeholder="Enter member Name" value="" /><br>
+                            value="" required/><br><br>
                         <input style="width: 230px;" type="text" name="field[]"
-                            placeholder="Enter exercise done by this member" value="" /><br>
+                            placeholder="Enter exercise done by this member" value="" required/><br>
                         <input style="width: 200px;" type="text" name="field[]"
-                            placeholder="Enter sets done for this exercise" value="" /><br>
+                            placeholder="Enter sets done for this exercise" value="" required/><br>
                         <input style="width: 200px;" type="text" name="field[]"
-                            placeholder="Enter reps done for this exercise " value="" /><br>
+                            placeholder="Enter reps done for this exercise " value="" required/><br>
 
 
                         <a href="javascript:void(0);" class="add-input" title="Add input"><img
@@ -74,7 +73,7 @@
                 var max_input_fields = 10;
                 var add_input = $('.add-input');
                 var input_wrapper = $('.input-wrapper');
-                var new_input = '<div> <input style="width: auto;" type="text" name="field[]" placeholder="Enter member username" value=""/><br>       <input type="text" name="field[]" placeholder="Enter member Name" value=""/><br>                <input style="width: 230px;" type="text" name="field[]" placeholder="Enter exercise done by this member" value=""/><br>                <input style="width: 200px;" type="text" name="field[]" placeholder="Enter sets done for this exercise" value=""/><br>                <input style="width: 200px;" type="text" name="field[]" placeholder="Enter reps done for this exercise " value=""/><br><a href="javascript:void(0);" class="remove-input" title="Remove input"><img src="/static/img/remove.png"/></a></div>';
+                var new_input = '<div>     <input style="width: 230px;" type="text" name="field[]" placeholder="Enter exercise done by this member" value="" required/><br>                <input style="width: 200px;" type="text" name="field[]" placeholder="Enter sets done for this exercise" value="" required/><br>                <input style="width: 200px;" type="text" name="field[]" placeholder="Enter reps done for this exercise " value="" required/><br><a href="javascript:void(0);" class="remove-input" title="Remove input"><img src="/static/img/remove.png"/></a></div>';
                 var add_input_count = 1;
                 $(add_input).click(function () {
                     if (add_input_count < max_input_fields) {
@@ -89,6 +88,11 @@
                 });
             });
         </script>
+        <a href="{{url_for('updateDailyReport')}}"><button type="button">Update Info for another member</button></a>
+              <button onclick="history.back()">
+                Click here to go back
+              </button>
+        
     </body>
 
     </html>

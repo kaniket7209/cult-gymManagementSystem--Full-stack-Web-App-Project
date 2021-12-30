@@ -1,5 +1,6 @@
 
 import numpy as np
+import matplotlib.pyplot as plt
 from flask import Flask, render_template, request, redirect, url_for,session, flash
 from wtforms import validators
 from wtforms.form import Form
@@ -9,6 +10,7 @@ import mysql.connector
 from wtforms.fields import *
 from credentials import *
 from passlib.hash import sha256_crypt
+from datetime import datetime
 app = Flask(__name__)
 
 mySql = MySQL(app)
@@ -40,44 +42,47 @@ class loginForm(Form):
 def login():
     form = loginForm(request.form)
     if request.method == "POST":
-        username = form.username.data
-        password_candidate = form.password.data
-        mydb.reconnect()
-        cur = mydb.cursor()
-        cur.execute('SELECT * FROM info WHERE username = %s', [username])
-        result = cur.fetchone()
-        print(result,"-----line 52")
-        # result = cur.fetchall()
-        
-        
-        name = result[0]
-        # data = cur.fetchone()
-        # admin_name = result[0]
-        password = result[1]
-        # hash = sha256_crypt.hash(password)
-        # print(password, "---------",  hash) #store hash in data base inspite of original password
-
-        # print(password,"--line 56")
-
-        if username == name and sha256_crypt.verify(password_candidate, password):
-            session['logged_in'] = True
-            session['username']=username
-            session['prof']=result[3] #profession
+        try:
+            username = form.username.data
+            password_candidate = form.password.data
+            mydb.reconnect()
+            cur = mydb.cursor()
+            cur.execute('SELECT * FROM info WHERE username = %s', [username])
+            result = cur.fetchone()
+            print(result,"-----line 52")
+            # result = cur.fetchall()
             
-            flash('You are logged in')
-            if session['prof'] == 1:
-                return redirect(url_for('admin'))
-            elif session['prof'] == 2:
-                return redirect(url_for('trainerdash'))
-            elif session['prof'] == 3:
-                return redirect(url_for('recepdash'))
-            elif session['prof'] == 4:
-                return redirect(url_for('memberdash'))
+            
+            name = result[0]
+            # data = cur.fetchone()
+            # admin_name = result[0]
+            password = result[1]
+            # hash = sha256_crypt.hash(password)
+            # print(password, "---------",  hash) #store hash in data base inspite of original password
 
-        else:
-            flash('Invalid Login')
-            return redirect(url_for('login'))
-        cur.close()
+            # print(password,"--line 56")
+
+            if username == name and sha256_crypt.verify(password_candidate, password):
+                session['logged_in'] = True
+                session['username']=username
+                session['prof']=result[3] #profession
+                
+                flash('You are logged in')
+                if session['prof'] == 1:
+                    return redirect(url_for('admin'))
+                elif session['prof'] == 2:
+                    return redirect(url_for('trainerdash'))
+                elif session['prof'] == 3:
+                    return redirect(url_for('recepdash'))
+                elif session['prof'] == 4:
+                    return redirect(url_for('memberdash'))
+
+            else:
+                flash('Username or Password entered is incorrect')
+                return redirect(url_for('login'))
+            cur.close()
+        except Exception:
+            flash("Username or Password entered is incorrect")
     return render_template("login.html", form = form)
 
 @app.route('/admin')
@@ -209,13 +214,13 @@ def addReceptionalist():
         
         cur.close()
         mydb.close()
-        flash('You recruited a new Receptionalist!!', 'success')
+        flash('You recruited a new Receptionalist!!')
         if session['prof'] == 1:
             return redirect(url_for('admin'))
         elif session['prof'] == 2:
             return redirect(url_for('trainerdash'))
     else:
-        flash("Username already taken !!! Change it", 'alert')
+        flash("Username already taken !!! Change it")
     return render_template('addTrainer.html',form=form)
 
 
@@ -792,39 +797,133 @@ def updateDailyReport():
         lists.append(tup)
         i+=1
     print(lists,"=--------801")
-    if request.method == "POST":
+    cur.close()
+    if request.method == "POST" :
         
         my_list = request.form.getlist('field[]')
-        n = len(my_list)/5 #where 5 is a no of input fields
-        print(my_list,"--------798",length)
+        memberName = my_list[0]
+        now = datetime.now()
+        #dd/mm/YY H:M:S
+        del my_list[0]
+        dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+        print(memberName,"-------801,--------",dt_string)
+        dateToday = dt_string.split(" ")[0]
+        timeToday = dt_string.split(" ")[1]
+        print(dateToday,"-------",timeToday)
+        n = len(my_list)/3  #where 3 is a no of input fields added on click
+        print(my_list,"--------798")
       
-        split = np.array_split(my_list,n)
-        for arr in split:
-            print(arr)
-
-
-           
-
-
-
-
-
-
+        split = np.array_split(my_list,n) #numpy - import it first after installing
 
         print (tuple(lists),"------------823")
 
-        # if username in tuple(list):
-        #     flash("Matched")
-        # else:
-        #     flash("Check your member username .. It's incorrect")
-        cur.close()
-        # print(name)
-
-
+        if memberName in tuple(lists):
+            for arr in split:
+                print(arr)
+                # for i in arr:
+                #     print(i,"---1")
+                print(memberName,dateToday, timeToday, arr[0], arr[1], arr[2])
+                mydb.reconnect()
+                cur = mydb.cursor()
+                val = (memberName,arr[0],arr[1],arr[2],dateToday,timeToday)
+                cur.execute("INSERT INTO dailyupdate(username,exercise,sets,reps,date,time) VALUES(%s, %s, %s, %s, %s, %s)",val)
+                mydb.commit()
+                cur.close()
+            flash("Information Updated for  {}...".format(memberName))
+            return redirect(url_for('trainerdash'))
+        else:
+            flash("Check your member username .. It's incorrect")
+        
     return render_template("dailyUpdate.html", list = lists)
 
+class updateProgress(Form):
+    username = StringField('Member Username',[Length(min=1, max=100)])
+    calories = IntegerField('Calories Burnt')
+    weight = IntegerField('Current Weight in (kg)',[NumberRange(min=20, max=1000)])
+
+@app.route('/updateProgress/', methods = ['GET','POST'])
+def progressupdate():
+    form = updateProgress(request.form)
+    mydb.reconnect()
+    cur = mydb.cursor()
+    cur.execute("SELECT username FROM members WHERE trainer = %s",[session['username']])
+    result = cur.fetchall()
+    i = 0
+    lists = []
+    while i < len(result):
+        tup = result[i][0]
+    
+        lists.append(tup)
+        i+=1
+    print(lists,"=--------854")
+    cur.close()
+    if request.method == 'POST' and form.validate():
+        try:
+
+            mydb.reconnect()
+            cur = mydb.cursor()
+            username = form.username.data
+            calories = form.calories.data
+            now = datetime.now()
+            dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+            date = dt_string.split(" ")[0]
+            if username in tuple(lists):
+                cur.execute("INSERT INTO calorychart(username,date,calories) VALUES (%s, %s, %s)", (username, date,calories))
+                mydb.commit()
+                flash("Updated ....")
+            
+            else:
+                flash("""Sorry {} ..
+                This member is not under you. Following are your's members """.format(session['username']))
+                return redirect(url_for('membersinfo'))
+            cur.close()
+            return redirect(url_for('trainerdash'))
+        except Exception:
+            flash("Can't update the info's for the same member today")
+            return redirect(url_for('trainerdash'))
+    return render_template('progressupdate.html', form = form)
+
+class ProgressForm(Form):
+    username = StringField('Members username ',[Length(min=1, max=100), InputRequired()])
 
 
+
+@app.route('/viewProgress', methods = ['GET','POST'])
+def viewprogress():
+    form = ProgressForm(request.form)
+    mydb.reconnect()
+    cur = mydb.cursor()
+    cur.execute("SELECT username FROM members WHERE trainer = %s",[session['username']])
+    result = cur.fetchall()
+    i = 0
+    lists = []
+    while i < len(result):
+        tup = result[i][0]
+    
+        lists.append(tup)
+        i+=1
+    print(lists,"=--------906")
+    cur.close()
+    if request.method == 'POST':
+        username = form.username.data
+        if username in tuple(lists):
+            mydb.reconnect()
+            cur= mydb.cursor()
+            cur.execute("SELECT date, calories FROM calorychart WHERE username = %s",[username])
+            infos = cur.fetchall()
+            # print(info,"---912")
+            plt.bar(range(len(infos)), [val[1] for val in infos], align='center')
+            # plt.bar(range(len(infos)), [val[1] for val in infos])
+            plt.xticks(range(len(infos)), [val[0] for val in infos])
+            plt.xticks(rotation=70)
+            plt.show()
+            
+        
+
+        else:
+            flash("Sorry {} is not your member".format(username))
+            return redirect(url_for('viewprogress'))
+    return render_template('progressanimation.html', form = form,list = lists )
 
 @app.route("/logout/")
 def logout():
