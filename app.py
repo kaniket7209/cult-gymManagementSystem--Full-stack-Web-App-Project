@@ -1,7 +1,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from flask import Flask, render_template, request, redirect, url_for,session, flash
+from flask import Flask, render_template, request, redirect, url_for,session, flash, jsonify, make_response
 from wtforms import validators
 from wtforms.form import Form
 from wtforms.validators import *
@@ -911,19 +911,106 @@ def viewprogress():
             cur= mydb.cursor()
             cur.execute("SELECT date, calories FROM calorychart WHERE username = %s",[username])
             infos = cur.fetchall()
-            # print(info,"---912")
-            plt.bar(range(len(infos)), [val[1] for val in infos], align='center')
-            # plt.bar(range(len(infos)), [val[1] for val in infos])
-            plt.xticks(range(len(infos)), [val[0] for val in infos])
-            plt.xticks(rotation=70)
-            plt.show()
-            
+            print(infos,"---912")
+            labels= [row[0] for row in infos]
+            values= [row[1] for row in infos]
+            print(labels, values)
+            return render_template('graph.html', labels = labels, values = values, username = username)
+           
+           
+          
         
+            
+           
 
         else:
             flash("Sorry {} is not your member".format(username))
             return redirect(url_for('viewprogress'))
     return render_template('progressanimation.html', form = form,list = lists )
+
+@app.route('/attendance/', methods = ['POST','GET'])
+def markattendance():
+    if request.method == 'POST':
+        # print(request.get_json())
+        try:
+            location = request.get_json()
+            latitude = location["latitude"]
+            longitude = location["longitude"]
+            username = session['username']
+            print(username)
+            now = datetime.now()
+            dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+            date = dt_string.split(" ")[0]
+            time = dt_string.split(" ")[1]
+            print(latitude, longitude,username, date, time)
+            mydb.reconnect()
+            cur =  mydb.cursor()
+            val = (username,date,time,latitude, longitude)
+            cur.execute("INSERT INTO attendance(username, date, time, latitude, longitude) VALUES(%s, %s, %s, %s, %s)", val)
+            mydb.commit()
+            cur.close()
+            flash("Attendance Marked... ")
+            if session['prof'] == 2:
+                return redirect(url_for('trainerdash'))
+            elif session['prof'] == 3:
+                return redirect(url_for('recepdash'))
+            elif session['prof'] == 4:
+                return redirect(url_for('memberdash'))
+        except Exception as e:
+            flash("Attendance already marked for {}".format(session['username']))
+            print(e)
+            if session['prof'] == 2:
+                return redirect(url_for('trainerdash'))
+            elif session['prof'] == 3:
+                return redirect(url_for('recepdash'))
+            elif session['prof'] == 4:
+                return redirect(url_for('memberdash'))
+
+
+    return render_template('attendance.html')
+
+class dateForm(Form):
+    date = DateField('Select date', [DataRequired()])
+
+@app.route('/showattendance/', methods=['POST','GET'])
+def showattendance():
+    form = dateForm(request.form)
+    if request.method == 'POST':
+        date = form.date.data
+        print(date,"----")
+        newdate = str(date).split("-")
+        print(newdate,"----")
+        listdate= []
+        listdate.append(newdate[2])
+        listdate.append(newdate[1])
+        listdate.append(newdate[0])
+        print(listdate)
+        finaldate = "/".join(listdate)
+        print(finaldate)
+
+        mydb.reconnect()
+        cur = mydb.cursor()
+        cur.execute("SELECT username, latitude, longitude, time FROM attendance WHERE date = %s ",[finaldate])
+        result = cur.fetchall()
+    
+        cur.close()
+        if result:
+            print(result)
+            # listusers = [row[0] for row in result]
+            # listlat = [row[1] for row in result]
+            # listlong = [row[2] for row in result]
+            # listtime = [row[3] for row in result]
+            # print(listusers,"----m---1002")
+            # print(listlat,"----m---10003", listlong)
+            return render_template('datetable.html', form = form, result=result)
+        else:
+            flash("Sorry {} no one in present on this day".format(session['username']))
+            return redirect(url_for('showattendance'))
+
+       
+
+    return render_template('datetable.html', form = form)
+
 
 @app.route("/logout/")
 def logout():

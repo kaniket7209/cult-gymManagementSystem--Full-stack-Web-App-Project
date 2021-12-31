@@ -1,0 +1,54 @@
+{% extends "layout.html" %}
+  
+{% block y %}
+
+<div class="attendance">
+
+    <h1 style="font-family: Georgia, 'Times New Roman', Times, serif;">Select date for which you want to check attendance</h1>
+</div>
+{% from "includes/formhelpers.html" import render_field %}
+<form method="POST" action="">
+  
+    <div class="form-group">
+      {{render_field(form.date, class_="form-control")}}
+    </div>
+   
+    <p><input type="submit" class="btn btn-primary" value="Submit"></p>
+      <br>
+      <br>
+      {% if result %}
+      <table>
+
+        <thead style="background-color: rgb(113, 155, 65);">
+            <tr>
+                <th>Username |</th>
+                <th>Latitude |</th>
+                <th>Longitude |</th>
+                <th>Arrival time |</th>
+               
+            </tr>
+        </thead>
+      </table>
+      {%endif%}
+      {% for row in result %}
+      <table>
+          <tbody>
+              <TR>
+                  <TD style="background-color: rgb(121, 68, 207);" class="c2">{{ row[0] }} &nbsp;</TD>
+                  <TD style="background-color: orchid;" class="c3">{{row[1]}} &nbsp;</TD>
+                  <TD  style="background-color: rgb(169, 177, 55);" class="c4"><SPAN>{{row[2]}} &nbsp;</SPAN></TD>
+                  <TD style="background-color:peru ;" class="c5"><SPAN>{{row[3]}} &nbsp; </SPAN></TD>
+                
+                  <br>
+              </TR>
+
+
+          </tbody>
+      </table>
+
+      {% endfor %}
+      
+<br>
+    <a href="{{url_for('admin')}}"><button type="button">Go back</button></a>
+  </form>
+{% endblock %}
