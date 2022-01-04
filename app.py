@@ -1,6 +1,5 @@
 
 import numpy as np
-import matplotlib.pyplot as plt
 from flask import Flask, render_template, request, redirect, url_for,session, flash, jsonify, make_response
 from wtforms import validators
 from wtforms.form import Form
@@ -27,7 +26,7 @@ database = "gymdatabase",
 
 @app.route("/")
 def home():
-    return render_template("home.html")
+    return render_template("cultfit.html")
 
 
 
@@ -49,7 +48,7 @@ def login():
             cur = mydb.cursor()
             cur.execute('SELECT * FROM info WHERE username = %s', [username])
             result = cur.fetchone()
-            print(result,"-----line 52")
+            # print(result,"-----line 52")
             # result = cur.fetchall()
             
             
@@ -937,7 +936,7 @@ def markattendance():
             latitude = location["latitude"]
             longitude = location["longitude"]
             username = session['username']
-            print(username)
+            print(username, location,"------------940")
             now = datetime.now()
             dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
             date = dt_string.split(" ")[0]
@@ -945,28 +944,38 @@ def markattendance():
             print(latitude, longitude,username, date, time)
             mydb.reconnect()
             cur =  mydb.cursor()
+            # for checking entries
+            # =============
+            cur.execute("SELECT username, date FROM attendance WHERE date = %s ",[date])
+            checklist = cur.fetchall()
+            print(checklist,"--951")
+            # =============
+            listuser = [row[0] for row in checklist]
+            print(listuser, "===========954")
+
             val = (username,date,time,latitude, longitude)
-            cur.execute("INSERT INTO attendance(username, date, time, latitude, longitude) VALUES(%s, %s, %s, %s, %s)", val)
-            mydb.commit()
-            cur.close()
-            flash("Attendance Marked... ")
-            if session['prof'] == 2:
-                return redirect(url_for('trainerdash'))
-            elif session['prof'] == 3:
-                return redirect(url_for('recepdash'))
-            elif session['prof'] == 4:
-                return redirect(url_for('memberdash'))
+            print(val,"================955")
+            if username in listuser:
+                print("marked",session['prof'])
+                flash("Attendance already marked")
+            else:
+                cur.execute("INSERT INTO attendance(username, date, time, latitude, longitude) VALUES(%s, %s, %s, %s, %s)", val)
+                mydb.commit()
+                cur.close() 
+                flash("Attendance Marked... ")
+
+
         except Exception as e:
-            flash("Attendance already marked for {}".format(session['username']))
             print(e)
-            if session['prof'] == 2:
-                return redirect(url_for('trainerdash'))
-            elif session['prof'] == 3:
-                return redirect(url_for('recepdash'))
-            elif session['prof'] == 4:
-                return redirect(url_for('memberdash'))
-
-
+        if session['prof'] == 2:
+            return redirect(url_for('trainerdash'))
+        elif session['prof'] == 3:
+            return redirect(url_for('recepdash'))
+        elif session['prof'] == 4:
+            return redirect(url_for('memberdash'))
+       
+ 
+    
     return render_template('attendance.html')
 
 class dateForm(Form):
@@ -1015,7 +1024,8 @@ def showattendance():
 @app.route("/logout/")
 def logout():
     session["username"] = None
-    return redirect("/login")
+    flash("Successfully Logged out")
+    return redirect(url_for('home'))
 
 if __name__ == "__main__":
     app.secret_key = "232422"

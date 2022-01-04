@@ -1,3 +1,10 @@
+{% extends "layout.html" %}
+
+{% block y %}
+<div class="view details" style="background-color: #bcf2cf">
+    <h1><small>Welcome</small><span class="font-italic font-weight-bold" style="color: #0d5125">
+            {{session.username}}</span></h1>
+
 <!DOCTYPE html>
 <html>
 <body>
@@ -21,11 +28,43 @@ function getLocation() {
 
 function showPosition(position) {
 
-  x.innerHTML = "Latitude: " + position.coords.latitude + 
-  "<br>Longitude: " + position.coords.longitude;
+
+  const location = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+        };
+        fetch(`http://127.0.0.1:5000/attendance/`, {
+            method: "POST",
+            credentials: "include",
+            body: JSON.stringify(location),
+            cache: "no-cache",
+            headers: new Headers({
+                "content-type": "application/json"
+            })
+        })
+            .then(function (response) {
+                if (response.status !== 200) {
+                    console.log(`Looks like there was a problem. Status code: ${response.status}`);
+                    return;
+                }
+                response.json().then(function (data) {
+                    console.log(data);
+                });
+                return response.json();
+            })
+            .catch(function (error) {
+                console.log("Fetch error: " + error);
+            });
+        console.log(location.latitude, "-----", location.longitude)
+
 }
 </script>
+<button onclick="history.back()">
+  Click here to go back
+</button>
 
 </body>
 </html>
 
+
+{% endblock %}

@@ -14,7 +14,26 @@
 		ul.hide {
 			opacity: 0;
 		}
+
+		#hideme {
+			width: 400px;
+			height: 30px;
+			background-color: red;
+			animation-name: example;
+			animation-duration: 4s;
+		}
+
+		@keyframes example {
+			from {
+				background-color: rgb(219, 93, 20);
+			}
+
+			to {
+				background-color: rgb(241, 207, 11);
+			}
+		}
 	</style>
+
 
 </head>
 
@@ -23,7 +42,7 @@
 	{% if messages %}
 	<ul id="hideme" class=flashes>
 		{% for message in messages %}
-		<li>{{ message }}</li>
+		<li><strong>{{ message }}</strong></li>
 		{% endfor %}
 	</ul>
 	{% endif %}
