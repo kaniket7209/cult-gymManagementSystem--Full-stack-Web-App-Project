@@ -297,17 +297,21 @@ def deleteReceptionalist():
 
 
 class addEquipForm(Form):
-    name = StringField('Equipment Name',[Length(min=1, max=100)])
-    count = IntegerField('Count',[NumberRange(min=1, max=25)])
+    name = StringField('Equipment Name',[Length(min=1, max=1000)])
+    count = IntegerField('Count',[NumberRange(min=1, max=1000)])
 
 @app.route('/addEquipment/',methods = ["POST","GET"])
 def addEquipment():
-    Equipchoices, countChoice = equipments() 
-    list = [Equipchoices, countChoice]
+  
+    mydb.reconnect()
+    cur = mydb.cursor()
+    cur.execute("SELECT * FROM equipments")
+    list = cur.fetchall()
+  
 
     form = addEquipForm(request.form)
     if request.method == "POST" and form.validate():
-        name = form.name.data
+        name = form.name.data.lower()
         count = form.count.data
         cur = mydb.cursor()
         cur.execute("SELECT name FROM equipments")
@@ -322,7 +326,7 @@ def addEquipment():
         # print(equips,"----------241")
         if name in equips:
             cur.execute("UPDATE equipments SET count = count+%s WHERE name = %s", (count, name))
-            flash('Updated')
+            flash('{} Updated '.format(name))
         else:
             cur.execute("INSERT INTO equipments(name, count) VALUES(%s, %s)",(name, count))
             flash('You added a new Equipment!!')
@@ -359,7 +363,8 @@ class removeEquipForm(Form):
     Equipchoices, countchoices = equipments() 
     if Equipchoices:
         name = RadioField(u'Select equipment which you want to remove', choices=Equipchoices)
-        count = IntegerField('Count',[NumberRange(min=1, max=25)])
+
+        count = IntegerField('Count')
     else:
         name = RadioField(u'Sorry Equipment list is empty', choices=['0'])
         count = IntegerField(' ')
@@ -368,9 +373,11 @@ class removeEquipForm(Form):
 @app.route('/removeEquipments/',methods = ["POST","GET"])
 def removeEquipments():
     form = removeEquipForm(request.form)
-    if request.method == "POST" and form.validate():
+    if request.method == "POST" :
         name = form.name.data
         count = form.count.data
+        print(name, count, "-----------375")
+        
  
         cur = mydb.cursor()
         cur.execute("SELECT name FROM equipments")
@@ -382,14 +389,20 @@ def removeEquipments():
             tup = result[i][0]
             equips.append(tup)
             i+=1
-        # print(equips,"----------241")
-        if name in equips:
+        print(equips,"----------241")
+        if name in equips and count != None:
             cur.execute("UPDATE equipments SET count = count-%s WHERE name = %s", (count, name))
             flash('{} {} deleted'.format(count, name))
-
+        elif name in equips and count == None:
+            cur.execute("DELETE FROM equipments WHERE name = %s", [name])
+            flash('{} deleted comepletely'.format(name))
         else:
-            return ("""Sorry {} No more equipments left <a href="/addEquipment">Add</a> it first""".format(session['username']))
-        mydb.commit()
+            flash("""Sorry {} Equipment not found """.format(session['username']))
+            if session['prof'] == 1:
+                return redirect(url_for('admin'))
+            elif session['prof'] == 2:
+                return redirect(url_for('trainerdash'))
+        mydb.commit() 
         cur.close()
         if session['prof'] == 1:
             return redirect(url_for('admin'))
@@ -978,11 +991,11 @@ def markattendance():
             return redirect(url_for('memberdash'))
        
  
-    
+     
     return render_template('attendance.html')
 
 class dateForm(Form):
-    date = DateField('Select date', [DataRequired()])
+    date = DateField('Select date for which you want to check attendance', [DataRequired()])
 
 @app.route('/showattendance/', methods=['POST','GET'])
 def showattendance():
