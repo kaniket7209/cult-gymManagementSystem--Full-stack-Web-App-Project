@@ -1,7 +1,6 @@
 {% extends "layout.html" %}
   
 {% block y %}
-<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,26 +21,17 @@
 
 
 
-=======
-
-
-<link rel="stylesheet" href="/static/css/profile.css">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
-  integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-  <div class="delete member" style="background-color: #a9bbee">
-    <h1><small>Welcome</small><span class="font-italic font-weight-bold" style="color: #0d1751"> {{session.username}}</span></h1>
-  </div> 
-{% from "includes/formhelpers.html" import render_field %}
-<form style="background-color: rgb(130, 177, 172);" method="POST" action="">
->>>>>>> 3508f580fdc2516918f6f5232304f2e24ff8c5af
-
 
   <style>
     .btn{
-            background-color: whitesmoke;
+        background: linear-gradient(to right, #00ff00 0%, #ffff66 100%);
             color: black;
+            border-radius: 3rem;
           }
-      @media screen and (max-width: 500px) {
+          body{
+              background-color: whitesmoke;
+          }
+      @media screen and (max-width: 600px) {
           .mainDiv{
               flex-direction: column;
           }
@@ -137,7 +127,7 @@
                  
                   
                 </ul>
-              </div><br><br>
+              </div><br>
               <div class="dropdown gap-5">
                 <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
                   TRAINER
@@ -147,7 +137,7 @@
                   <li><a class="dropdown-item" href="{{url_for('deleteTrainer')}}">DELETE</a></li>
                 
                 </ul>
-              </div><br><br>
+              </div><br>
               <div class="dropdown">
                 <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
                   RECEPTIONIST
@@ -157,7 +147,7 @@
                   <li><a class="dropdown-item" href="{{url_for('deleteReceptionalist')}}">DELETE</a></li>
                   
                 </ul>
-              </div><br><br>
+              </div><br>
               <div class="dropdown">
                 <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
                   EQUIPMENTS
@@ -167,7 +157,7 @@
                   <li><a class="dropdown-item" href="{{url_for('removeEquipments')}}">DELETE</a></li>
                   <li><a class="dropdown-item" href="{{url_for('viewEquip')}}">VIEWS</a></li>
                 </ul>
-              </div><br><br>
+              </div><br>
               <div class="dropdown">
                 <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
                   PLANS
@@ -177,7 +167,7 @@
                   <li><a class="dropdown-item" href="{{url_for('delplans')}}">DELETE</a></li>
                   <li><a class="dropdown-item" href="{{url_for('viewplans')}}">VIEWS</a></li>
                 </ul>
-              </div><br><br>
+              </div><br>
               <div class="dropdown">
                 <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
                  MEMBERS
@@ -187,7 +177,7 @@
                   <li><a class="dropdown-item" href="{{url_for('deleteMember')}}">DELETE</a></li>
                   
                 </ul>
-              </div><br><br>
+              </div><br>
               <div class="dropdown">
                 <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
                  DETAILS
@@ -204,7 +194,7 @@
     </div>
 
     {% from "includes/formhelpers.html" import render_field %}
-      <form class="p-5 w-50" style="border: 2px solid black; border-radius: 2rem; margin: auto; background-color: whitesmoke;" action="" method="POST">
+      <form class="p-5 " style="border: 2px solid black; border-radius: 2rem; margin: auto; background-color: whitesmoke;" action="" method="POST">
       
         <div class="mb-3">
           {{render_field(form.name, class_="form-control")}}      
@@ -256,14 +246,6 @@
 
 
 
-<<<<<<< HEAD
 </body>
 </html>
-=======
-  </div>
-</form>
-<button onclick="history.back()">
-  Click here to go back
-</button>
->>>>>>> 3508f580fdc2516918f6f5232304f2e24ff8c5af
 {% endblock %}

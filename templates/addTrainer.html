@@ -22,13 +22,16 @@
 
 
 
-
   <style>
     .btn{
-            background-color: whitesmoke;
+        background: linear-gradient(to right, #00ff00 0%, #ffff66 100%);
             color: black;
+            border-radius: 3rem;
           }
-      @media screen and (max-width: 500px) {
+          body{
+              background-color: whitesmoke;
+          }
+      @media screen and (max-width: 600px) {
           .mainDiv{
               flex-direction: column;
           }
@@ -124,7 +127,7 @@
                
                 
               </ul>
-            </div><br><br>
+            </div><br>
             <div class="dropdown gap-5">
               <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
                 TRAINER
@@ -134,7 +137,7 @@
                 <li><a class="dropdown-item" href="{{url_for('deleteTrainer')}}">DELETE</a></li>
               
               </ul>
-            </div><br><br>
+            </div><br>
             <div class="dropdown">
               <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
                 RECEPTIONIST
@@ -144,7 +147,7 @@
                 <li><a class="dropdown-item" href="{{url_for('deleteReceptionalist')}}">DELETE</a></li>
                 
               </ul>
-            </div><br><br>
+            </div><br>
             <div class="dropdown">
               <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
                 EQUIPMENTS
@@ -154,7 +157,7 @@
                 <li><a class="dropdown-item" href="{{url_for('removeEquipments')}}">DELETE</a></li>
                 <li><a class="dropdown-item" href="{{url_for('viewEquip')}}">VIEWS</a></li>
               </ul>
-            </div><br><br>
+            </div><br>
             <div class="dropdown">
               <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
                 PLANS
@@ -164,7 +167,7 @@
                 <li><a class="dropdown-item" href="{{url_for('delplans')}}">DELETE</a></li>
                 <li><a class="dropdown-item" href="{{url_for('viewplans')}}">VIEWS</a></li>
               </ul>
-            </div><br><br>
+            </div><br>
             <div class="dropdown">
               <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
                MEMBERS
@@ -174,7 +177,7 @@
                 <li><a class="dropdown-item" href="{{url_for('deleteMember')}}">DELETE</a></li>
                 
               </ul>
-            </div><br><br>
+            </div><br>
             <div class="dropdown">
               <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
                DETAILS
