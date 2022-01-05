@@ -1,6 +1,6 @@
 
 import numpy as np
-from flask import Flask, render_template, request, redirect, url_for,session, flash, jsonify, make_response
+from flask import Flask, render_template, request, redirect, url_for,session, flash
 from wtforms import validators
 from wtforms.form import Form
 from wtforms.validators import *
@@ -86,17 +86,17 @@ def login():
 
 @app.route('/admin')
 def admin():
-    return render_template('adminDash.html')
+    return render_template('dashboard.html')
 
 @app.route('/trainerDashboard')
 def trainerdash():
     return render_template('trainerdash.html')
-
+ 
 
 @app.route('/recepDash')
 def recepdash():
     return render_template('recepdash.html')
-
+ 
 @app.route('/memberDash')
 def memberdash():
     
@@ -160,9 +160,9 @@ def addTrainer():
         elif session['prof'] == 2:
             return redirect(url_for('trainerdash'))
     else:
-        flash("Username already taken !!! Change it")
+        flash("Please check your entries...")
     return render_template('addTrainer.html',form=form)
-
+ 
 
 def recep():
     Recepchoices =[]
@@ -287,14 +287,17 @@ def deleteReceptionalist():
             mydb.commit()
             cur.close()
             flash("{} removed from receptionalists list".format(username))
-        # return ' {} removed <a href="/admin">Go back </a>'.format(username) 
+        if session['prof'] == 1:
+            return redirect(url_for('admin'))
+        elif session['prof'] == 2:
+            return redirect(url_for('trainerdash')) 
 
 
     return render_template("deleteTrainer.html", form=form)    
 
 
 class addEquipForm(Form):
-    name = StringField('Name',[Length(min=1, max=100)])
+    name = StringField('Equipment Name',[Length(min=1, max=100)])
     count = IntegerField('Count',[NumberRange(min=1, max=25)])
 
 @app.route('/addEquipment/',methods = ["POST","GET"])
@@ -422,14 +425,14 @@ def planChoices():
 
 
 class addPlanForm(Form):
-    name = StringField('Plan name',[Length(min=1, max=50)])
-    duration = IntegerField('Duration (in month)',[NumberRange(min=1, max=36)])
-    price = IntegerField('Price',[NumberRange(min=1, max=60000)])
+    name = StringField('Plan name',[Length(min=1, max=50), DataRequired()])
+    duration = IntegerField('Duration (in month)',[NumberRange(min=1, max=36), DataRequired()])
+    price = IntegerField('Price',[NumberRange(min=1, max=60000), DataRequired()])
 
 @app.route('/addPlans/', methods = ['POST', 'GET'])
 def addPlans():
     form = addPlanForm(request.form)
-    if request.method == "POST":
+    if request.method == "POST" and form.validate():
         name = form.name.data
         duration = form.duration.data
         price = form.price.data

@@ -1,0 +1,12 @@
+*{
+    box-sizing: border-box;
+    padding: 0;
+}
+.side{
+    width: 20rem;
+    height: 8rem;
+}
+.down{
+    width: 20rem;
+    height: 50rem
+}
