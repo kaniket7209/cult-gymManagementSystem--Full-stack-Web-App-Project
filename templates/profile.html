@@ -1,3 +1,7 @@
+
+{% extends "layout.html" %}
+
+{% block y %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -198,18 +202,19 @@
         <h1 class="ms-2" style="font-weight: bold;">MY PROFILE</h1>
 
         <div>
+          {% for row in result %}
                 <div class="formDiv d-flex align-items-center justify-content-center p-4 " style="gap: 3rem;">
                 <form>
                     <div class="row g-3 " style="font-family: BrandonTextWeb-Bold;font-size: 18px;">
                       <label for="name" style="font-weight: bold;">User Name</label>
                       
-                      <label for="name" style="border-bottom: 1px solid rgb(100, 100, 100)">ABC</label>
+                      <label for="name" style="border-bottom: 1px solid rgb(100, 100, 100)">{{ row[0] }} </label>
                    
                       <label for="name" style="font-weight: bold;">NAME</label>
-                      <label for="name" style="border-bottom: 1px solid rgb(100, 100, 100)">ABC</label>
+                      <label for="name" style="border-bottom: 1px solid rgb(100, 100, 100)">{{ row[2] }} </label>
                    
                      <label for="name" style="font-weight: bold;">PROFFESSION</label> 
-                     <label for="name" style="border-bottom: 1px solid rgb(100, 100, 100)">None</label>
+                     <label for="name" style="border-bottom: 1px solid rgb(100, 100, 100)">{{ row[3] }} </label>
                    
                   </div>
                       </form>
@@ -217,24 +222,24 @@
                         <div class="row g-3"style="font-family: BrandonTextWeb-Bold; font-size:18px;" >
                    
                     <label for="name" style="font-weight: bold;">STREET</label>
-                    <label for="name" style="border-bottom: 1px solid rgb(100, 100, 100)">Street number-3</label>
+                    <label for="name" style="border-bottom: 1px solid rgb(100, 100, 100)">{{ row[4] }} </label>
                  
                
                
                     <label for="name" style="font-weight: bold;">CITY</label>
-                    <label for="name" style="border-bottom: 1px solid rgb(100, 100, 100)">Delhi</label>
+                    <label for="name" style="border-bottom: 1px solid rgb(100, 100, 100)">{{ row[5] }} </label>
                
                 
                     <label for="name" style="font-weight: bold;">PHONE NUMBER</label>
-                    <label for="name" style="border-bottom: 1px solid rgb(100, 100, 100)">9870256893</label>
+                    <label for="name" style="border-bottom: 1px solid rgb(100, 100, 100)">{{ row[6] }} </label>
                
               </div>
                         
                       </form>
                       
             </div>
-          
-        </div>
+            {% endfor %}
+          </div>
        
     </div>
 
@@ -259,3 +264,4 @@
 
 </body>
 </html>
+{% endblock %}

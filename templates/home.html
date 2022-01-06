@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+</head>
+<body>
+    {% extends "layout.html" %}
+  
+{% block y %}
+  
+<h1><strong>Welcome to Gym Management System</strong></h1>
+<p class="font-italic">The Gym Management System is to automate everything that happens
+in the gym. It is to aid and simplify the job all those who work for the gym, who train
+in the gym and who owns the gym. The database consists of daily goals and stats of
+achievements/progress of a member who trains in the gym, contact details and
+personal info of everyone, training programs that the gym offers, equipment etc.</p>
+
+   {% if session.username %}
+   <h1>Wecome Again !!! {{ session.username }} <a href="/logout">logout</a>.</h1>
+    
+   {% else %}
+   <h1>You are not Registered <a href="/login">login</a>.</h1>
+     
+   {% endif %}
+{% endblock %}
+</body>
+</html>

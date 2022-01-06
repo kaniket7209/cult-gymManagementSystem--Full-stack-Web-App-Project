@@ -118,6 +118,7 @@
         <!-- niche -->
 
         <div class="down  bg-white p-3 justify-content-center align-content-center" style="width: 18rem; font-family: 'BrandonTextWeb-Regular'; border-radius: 25px;">
+          {%if session['prof'] == 1%}
           <ol class="down-list ">
             <div class="dropdown">
               <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
@@ -190,21 +191,93 @@
               </ul>
             </div>
           </ol>
+          {%else%}
+          <ol class="down-list ">
+            <div class="dropdown">
+              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+               HOME PAGE
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                <li><a class="dropdown-item" href="{{url_for('home')}}">VIEW</a></li>
+               
+                
+              </ul>
+            </div><br>
+            <div class="dropdown gap-5">
+              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                ATTENDANCE
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                <li><a class="dropdown-item" href="{{url_for('markattendance')}}">Mark Your Attendance</a></li>
+              
+              </ul>
+            </div><br>
+            <div class="dropdown">
+              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                PASSWORD
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                <li><a class="dropdown-item" href="{{url_for('changepass')}}">Change Password</a></li>
+                
+              </ul>
+            </div><br>
+            <div class="dropdown">
+              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                EQUIPMENTS
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+
+                <li><a class="dropdown-item" href="{{url_for('viewEquip')}}">VIEW</a></li>
+              </ul>
+            </div><br>
+            <div class="dropdown">
+              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                PLANS
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+          
+                <li><a class="dropdown-item" href="{{url_for('viewplans')}}">VIEWS</a></li>
+              </ul>
+            </div><br>
+            <div class="dropdown">
+              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+              YOUR MEMBERS
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                <li><a class="dropdown-item" href="{{url_for('membersinfo')}}">Info</a></li>
+                
+              </ul>
+            </div><br>
+            <div class="dropdown">
+              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+               REPORT
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                <li><a class="dropdown-item" href="{{url_for('updateDailyReport')}}">Update Exercise Details of your members</a></li>
+                <li><a class="dropdown-item" href="{{url_for('progressupdate')}}">Update Progress info of your members</a></li>
+                <li><a class="dropdown-item" href="{{url_for('viewprogress')}}">View Member's Progress</a></li>
+                
+              </ul>
+            </div><br>
+          
+         
+          </ol>
+          {%endif%}
           </div>
          
     </div>
 
     {% from "includes/formhelpers.html" import render_field %}
     
-<h1><span class="font-italic font-weight-bold" style="color: #0d5125">
-    Hi {{session.username}} Please mark your attendance</span></h1>
+
 
       <form class="p-5 w-50" style="border: 2px solid black; border-radius: 2rem; margin: auto; background-color: whitesmoke;" action="" method="POST">
-        <p>Click the button to mark your attendance</p>
-        <button name="loc" onclick="getLocation()">Mark Attendance</button>
+        <h1><span class="font-italic font-weight-bold" style="color: #0d5125">
+         Please mark your attendance</span></h1>
+        <p>Click the button </p>
+        <button  class="btn btn-primary" name="loc" onclick="getLocation()">Mark Attendance</button>
 
-        <button type="submit" class="btn btn-primary" value="Submit">Submit</button>
-        
+       
       </form>
       <p id="attendance"></p>
       <script>
@@ -254,10 +327,7 @@
         }
     
     </script>
-    
-    <button onclick="history.back()">
-        Click here to go back
-    </button>
+
 </div>
 
 </div>

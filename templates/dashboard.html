@@ -1,3 +1,6 @@
+{% extends "layout.html" %}
+  
+{% block y %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -53,7 +56,7 @@
             aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-       
+        <h1>welcome {{session.username}}</h1>
         <div class="collapse navbar-collapse row" id="navbarSupportedContent">
             <ul class="navbar-nav  mt-2 justify-content-center">
                 <li class="nav-item ms-3">
@@ -116,6 +119,16 @@
 
         <div class="down shadow-lg  p-3 justify-content-center align-content-center" style="width: 18rem; font-family: 'BrandonTextWeb-Regular'; border-radius: 25px;background-color: whitesmoke;">
           <ol class="down-list ">
+            <div class="dropdown">
+              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+               Home Page
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                <li><a class="dropdown-item" href="{{url_for('home')}}">VIEW</a></li>
+               
+                
+              </ul>
+            </div><br>
             <div class="dropdown">
               <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
                ATTENDANCE
@@ -259,3 +272,4 @@
 
 </body>
 </html>
+{% endblock %}

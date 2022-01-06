@@ -1,17 +1,234 @@
 {% extends "layout.html" %}
-
+  
 {% block y %}
-<h1><small>Welcome</small><span class="font-italic font-weight-bold" style="color: #0d5125">
-        {{session.username}}</span></h1>
-<h2>Your members username </h2>
-<div id="membersList" style="font-family: cursive; background-color: rgb(137, 204, 137);">
-    {% for row in list %}
-    <h4>{{row}}</h4>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+ 
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"
+    integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"
+    integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13"
+    crossorigin="anonymous"></script>
+  <script src="/static/js/fit.js"></script>
+  <link rel="stylesheet" href="/static/css/dashboardui.css">
 
-    {% endfor %}
 
-</div>
-<div class="Edit profile">
+
+
+
+  <style>
+    .btn{
+        background: linear-gradient(to right, #00ff00 0%, #ffff66 100%);
+            color: black;
+            border-radius: 3rem;
+          }
+          body{
+              background-color: whitesmoke;
+          }
+      @media screen and (max-width: 600px) {
+          .mainDiv{
+              flex-direction: column;
+          }
+      }
+
+     
+  </style>
+</head>
+<body>
+    
+
+    <!-- ============================================navbar==================================================== -->
+    <nav class="navbar navbar-expand-lg navbar-light border shadow-1  "
+    style="width: 100%; background:linear-gradient(skyblue,#ffea00) ">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+            <img src="https://static.cure.fit/assets/images/curefit-v-man.svg" alt="">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+            data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+            aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <h1>welcome {{session.username}}</h1>
+        <div class="collapse navbar-collapse row" id="navbarSupportedContent">
+            <ul class="navbar-nav  mt-2 justify-content-center">
+                <li class="nav-item ms-3">
+                    <a class="nav-link " aria-current="page" href="#"><img
+                            src="https://img.icons8.com/material-outlined/30s/000000/running.png" />cult
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#"><img
+                            src="https://img.icons8.com/windows/30/000000/camera--v1.png" /> Live
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="#"> <img
+                            src="https://img.icons8.com/external-vitaliy-gorbachev-fill-vitaly-gorbachev/30/000000/external-yoga-health-vitaliy-gorbachev-fill-vitaly-gorbachev.png" />
+                        Mind
+                    </a>
+                </li>
+            
+
+                <li class="nav-item">
+                  <a class="nav-link " href="/logout"><img
+                      src="https://img.icons8.com/external-bearicons-detailed-outline-bearicons/30/000000/external-login-call-to-action-bearicons-detailed-outline-bearicons-1.png" />
+                    Logout</a>
+      
+                </li>
+            </ul>
+
+        </div>
+    </div>
+
+
+</nav>
+
+
+
+  <div class="mainDiv  d-flex p-3" style="background-color: whitesmoke; ">
+    <div class="left ">
+        <!-- upar -->
+        <div class="side shadow-lg justify-content-center align-content-center mb-2  " style="height: 10rem;
+        background-color: whitesmoke;
+        width: 18rem;
+        border-radius: 25px;
+        text-align: center;">
+          <div class="profile">
+            <img src="https://img.icons8.com/dotty/80/000000/gender-neutral-user.png" />
+
+            <a href="{{url_for('profile')}}" class="text-black" style="font-weight: bold;" >View Profile</a>
+            
+
+          </div>
+          
+          <p> Name:- {{session.username}}</p>
+          <a href="{{url_for('editprofile')}}" class="text-black" style="font-weight: bold;">Edit Profile</a>
+
+
+        </div>
+        <!-- niche -->
+
+        <div class="down shadow-lg  p-3 justify-content-center align-content-center" style="width: 18rem; font-family: 'BrandonTextWeb-Regular'; border-radius: 25px;background-color: whitesmoke;">
+            <ol class="down-list ">
+                <div class="dropdown">
+                  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                   HOME PAGE
+                  </button>
+                  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                    <li><a class="dropdown-item" href="{{url_for('home')}}">VIEW</a></li>
+                   
+                    
+                  </ul>
+                </div><br>
+                <div class="dropdown gap-5">
+                  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                    ATTENDANCE
+                  </button>
+                  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                    <li><a class="dropdown-item" href="{{url_for('markattendance')}}">Mark Your Attendance</a></li>
+                  
+                  </ul>
+                </div><br>
+                <div class="dropdown">
+                  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                    PASSWORD
+                  </button>
+                  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                    <li><a class="dropdown-item" href="{{url_for('changepass')}}">Change Password</a></li>
+                    
+                  </ul>
+                </div><br>
+                <div class="dropdown">
+                  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                    EQUIPMENTS
+                  </button>
+                  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+    
+                    <li><a class="dropdown-item" href="{{url_for('viewEquip')}}">VIEW</a></li>
+                  </ul>
+                </div><br>
+                <div class="dropdown">
+                  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                    PLANS
+                  </button>
+                  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+              
+                    <li><a class="dropdown-item" href="{{url_for('viewplans')}}">VIEWS</a></li>
+                  </ul>
+                </div><br>
+                <div class="dropdown">
+                  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                  YOUR MEMBERS
+                  </button>
+                  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                    <li><a class="dropdown-item" href="{{url_for('membersinfo')}}">Info</a></li>
+                    
+                  </ul>
+                </div><br>
+                <div class="dropdown">
+                  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                   REPORT
+                  </button>
+                  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                    <li><a class="dropdown-item" href="{{url_for('updateDailyReport')}}">Update Exercise Details of your members</a></li>
+                    <li><a class="dropdown-item" href="{{url_for('progressupdate')}}">Update Progress info of your members</a></li>
+                    <li><a class="dropdown-item" href="{{url_for('viewprogress')}}">View Member's Progress</a></li>
+                    
+                  </ul>
+                </div><br>
+              
+             
+              </ol>
+          </div>
+         
+    </div>
+<div class="right m-auto" >
+  
+    <div class="text-black" >
+
+        <table class="table table-bordered text-black" style="background-color: whitesmoke;">
+    
+            <thead style="background-color: rgb(113, 155, 65);">
+                <tr>
+                  <th> Member's List </th>
+
+                  
+                </tr>
+
+            </thead>
+       
+            {% for row in list %}
+            <tbody>
+                <tr>
+                  <TD class="c3">{{ row}} </TD>
+                
+                  
+                </tr>
+
+
+            </tbody>
+            {% endfor %}
+        </table>
+  
+        
+        <br>
+        
+
+    </div>
+
+
+
+<div class="Result">
     <html>
 
     <head>
@@ -44,7 +261,7 @@
 
     <body>
         <div style="width:100%;padding:50px;background-color: #88a84b;">
-            <h2>UPDATE DAILY RESULT</h2>
+            <h2 style="background-color: whitesmoke;">UPDATE DAILY RESULT</h2>
             <form method="POST">
                 <div class="input-wrapper">
 
@@ -52,11 +269,11 @@
                         <h2>Update Form : </h2>
                         <input style="width: auto;" type="text" name="field[]" placeholder="Enter member username"
                             value="" required/><br><br>
-                        <input style="width: 230px;" type="text" name="field[]"
+                        <input style="width: 263px;" type="text" name="field[]"
                             placeholder="Enter exercise done by this member" value="" required/><br>
-                        <input style="width: 200px;" type="text" name="field[]"
+                        <input style="width: 238px;" type="text" name="field[]"
                             placeholder="Enter sets done for this exercise" value="" required/><br>
-                        <input style="width: 200px;" type="text" name="field[]"
+                        <input style="width: 238px;" type="text" name="field[]"
                             placeholder="Enter reps done for this exercise " value="" required/><br>
 
 
@@ -96,5 +313,23 @@
     </body>
 
     </html>
+
+    
+</div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     {% endblock %}

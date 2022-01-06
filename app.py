@@ -7,6 +7,7 @@ from wtforms.validators import *
 from flask_mysqldb import MySQL
 import mysql.connector
 from wtforms.fields import *
+from functools import wraps
 from credentials import *
 from passlib.hash import sha256_crypt
 from datetime import datetime
@@ -22,6 +23,57 @@ password= "",
 database = "gymdatabase", 
 
 )
+
+def is_logged_in(f):
+	@wraps(f)
+	def wrap(*args, **kwargs):
+		if 'logged_in' in session:
+			return f(*args, **kwargs)
+		else:
+			flash('Nice try, Tricks don\'t work, bud!! Please Login :)')
+			return redirect(url_for('login'))
+	return wrap
+
+def is_trainer(f):
+	@wraps(f)
+	def wrap(*args, **kwargs):
+		if session['prof'] == 2:
+			return f(*args, **kwargs)
+		else:
+			flash('You are probably not a trainer!!, Are you?')
+			return redirect(url_for('login'))
+	return wrap
+
+def is_admin(f):
+	@wraps(f)
+	def wrap(*args, **kwargs):
+		if session['prof'] == 1:
+			return f(*args, **kwargs)
+		else:
+			flash('You are probably not an admin!!, Are you?')
+			return redirect(url_for('login'))
+	return wrap
+
+def is_recep(f):
+	@wraps(f)
+	def wrap(*args, **kwargs):
+		if session['prof'] == 3:
+			return f(*args, **kwargs)
+		else:
+			flash('You are probably not an authorised to view that page!!')
+			return redirect(url_for('login'))
+	return wrap
+
+def is_member(f):
+	@wraps(f)
+	def wrap(*args, **kwargs):
+		if session['prof'] == 4:
+			return f(*args, **kwargs)
+		else:
+			flash('You are probably not an authorised to view that page!!')
+			return redirect(url_for('login'))
+	return wrap
+
 
 
 @app.route("/")
@@ -62,7 +114,7 @@ def login():
             # print(password,"--line 56")
 
             if username == name and sha256_crypt.verify(password_candidate, password):
-                session['logged_in'] = True
+                session['logged_in'] = True # for middle ware
                 session['username']=username
                 session['prof']=result[3] #profession
                 
@@ -85,19 +137,37 @@ def login():
     return render_template("login.html", form = form)
 
 @app.route('/admin')
+@is_logged_in
+@is_admin
 def admin():
     return render_template('dashboard.html')
 
 @app.route('/trainerDashboard')
+@is_logged_in
+@is_trainer
 def trainerdash():
-    return render_template('trainerdash.html')
+    mydb.reconnect()
+    cur = mydb.cursor(buffered=True)
+    cur.execute("SELECT * FROM info WHERE username = %s", [session['username']])
+    result = cur.fetchall()
+    cur.close()
+    return render_template('trainerdash.html', result = result)
  
 
 @app.route('/recepDash')
+@is_logged_in
+@is_recep
 def recepdash():
-    return render_template('recepdash.html')
+    mydb.reconnect()
+    cur = mydb.cursor(buffered=True)
+    cur.execute("SELECT * FROM info WHERE username = %s", [session['username']])
+    result = cur.fetchall()
+    cur.close()
+    return render_template('recepdash.html', result = result)
  
 @app.route('/memberDash')
+@is_logged_in
+@is_member
 def memberdash():
     
     return render_template('memberdash.html')
@@ -133,6 +203,8 @@ class AddTrainerForm(Form):
 
     
 @app.route('/addTrainer/', methods = ['GET','POST'])
+@is_logged_in
+@is_admin
 def addTrainer(): 
     
     form = AddTrainerForm(request.form) 
@@ -192,6 +264,8 @@ class AddRecepForm(Form):
 
 
 @app.route('/addReceptionalist/', methods = ['GET','POST'])
+@is_logged_in
+@is_admin
 def addReceptionalist(): 
    
     form = AddRecepForm(request.form)
@@ -235,6 +309,8 @@ class deleteForm(Form):
 
 
 @app.route('/deleteTrainer/', methods=['POST','GET'])
+@is_logged_in
+@is_admin
 def deleteTrainer():    
     form = deleteForm(request.form)
     if request.method == 'POST':
@@ -271,6 +347,8 @@ class deleteRecepForm(Form):
 
 
 @app.route('/deleteReceptionalist/', methods=['POST','GET'])
+@is_logged_in
+@is_admin
 def deleteReceptionalist():
     form = deleteRecepForm(request.form)
     if request.method == 'POST':
@@ -301,6 +379,8 @@ class addEquipForm(Form):
     count = IntegerField('Count',[NumberRange(min=1, max=1000)])
 
 @app.route('/addEquipment/',methods = ["POST","GET"])
+@is_logged_in
+@is_admin
 def addEquipment():
   
     mydb.reconnect()
@@ -371,6 +451,8 @@ class removeEquipForm(Form):
 
 
 @app.route('/removeEquipments/',methods = ["POST","GET"])
+@is_logged_in
+@is_admin
 def removeEquipments():
     form = removeEquipForm(request.form)
     if request.method == "POST" :
@@ -413,6 +495,7 @@ def removeEquipments():
     return render_template('removeEquip.html', form = form)
 
 @app.route('/viewEquipments')
+@is_logged_in
 def viewEquip():
     mydb.reconnect()
     cur = mydb.cursor()
@@ -443,6 +526,9 @@ class addPlanForm(Form):
     price = IntegerField('Price',[NumberRange(min=1, max=60000), DataRequired()])
 
 @app.route('/addPlans/', methods = ['POST', 'GET'])
+@is_logged_in
+@is_admin
+@is_recep
 def addPlans():
     form = addPlanForm(request.form)
     if request.method == "POST" and form.validate():
@@ -503,6 +589,9 @@ class addMemberForm(Form):
 
 
 @app.route('/addMember/', methods = ['GET','POST'])
+@is_logged_in
+@is_admin
+@is_recep
 def addMember():
     form =  addMemberForm(request.form)
     if request.method == "POST" and form.validate():
@@ -547,6 +636,8 @@ class deleteMemberform(Form):
 
 
 @app.route('/deleteMember', methods = ['GET', 'POST'])
+@is_logged_in
+@is_admin
 def deleteMember():
     form = deleteMemberform(request.form)
     if request.method == "POST" and form.validate():
@@ -575,6 +666,7 @@ def deleteMember():
 
 
 @app.route('/viewdetails')
+@is_logged_in
 def details():
     
     mydb.reconnect()
@@ -595,6 +687,8 @@ def details():
 
 
 @app.route('/viewplans/')
+@is_logged_in
+
 def viewplans():
     mydb.reconnect()
     cur= mydb.cursor()
@@ -611,6 +705,8 @@ class delplanForm(Form):
     name = RadioField(u'Plans list',choices=planChoices)
  
 @app.route('/delplans/', methods = ['POST', 'GET'])
+@is_logged_in
+@is_admin
 def delplans():
     form = delplanForm(request.form)
     if request.method == "POST":
@@ -650,6 +746,7 @@ class editprofileForm(Form):
 #edit profile not working
 
 @app.route('/editprofile/', methods = ['POST','GET'])
+@is_logged_in
 def editprofile():
     form = editprofileForm(request.form)
     if request.method == 'POST' and form.validate():
@@ -682,6 +779,7 @@ class changepasswordForm(Form):
    
 
 @app.route('/changepass/', methods = ['POST','GET'])
+@is_logged_in
 def changepass():
     form = changepasswordForm(request.form)
     if request.method == 'POST' and form.validate():
@@ -703,6 +801,7 @@ def changepass():
     return render_template('changepassword.html', form= form)
 
 @app.route('/myprofile/')
+@is_logged_in
 def profile():
     mydb.reconnect()
     cur = mydb.cursor(buffered=True)
@@ -712,6 +811,7 @@ def profile():
     return render_template('profile.html', result=result)
 
 @app.route('/contactinfo/')
+@is_logged_in
 def contactdetails():
     mydb.reconnect()
     cur = mydb.cursor()
@@ -723,6 +823,8 @@ def contactdetails():
 
 
 @app.route('/myTrainer/')
+@is_logged_in
+@is_member
 def mytrainer():
     mydb.reconnect()
     cur= mydb.cursor()
@@ -739,6 +841,8 @@ def mytrainer():
 
 
 @app.route('/myplan/')
+@is_logged_in
+@is_member
 def myplan():
     mydb.reconnect()
     cur= mydb.cursor()
@@ -755,6 +859,8 @@ def myplan():
     return render_template('myplan.html', data = data)
 
 @app.route('/membersinfo')
+@is_logged_in
+@is_trainer
 def membersinfo():
     mydb.reconnect()
     cur= mydb.cursor()
@@ -798,6 +904,8 @@ def membersinfo():
 
 
 @app.route('/dailyReportsUpdate', methods = ['POST','GET'])
+@is_logged_in
+@is_trainer
 def updateDailyReport():
 
     mydb.reconnect()
@@ -852,11 +960,13 @@ def updateDailyReport():
     return render_template("dailyUpdate.html", list = lists)
 
 class updateProgress(Form):
-    username = StringField('Member Username',[Length(min=1, max=100)])
+    username = StringField("""Username""",[Length(min=1, max=100)])
     calories = IntegerField('Calories Burnt')
     weight = IntegerField('Current Weight in (kg)',[NumberRange(min=20, max=1000)])
 
 @app.route('/updateProgress/', methods = ['GET','POST'])
+@is_logged_in
+@is_trainer
 def progressupdate():
     form = updateProgress(request.form)
     mydb.reconnect()
@@ -899,11 +1009,14 @@ def progressupdate():
     return render_template('progressupdate.html', form = form)
 
 class ProgressForm(Form):
-    username = StringField('Members username ',[Length(min=1, max=100), InputRequired()])
+    username = StringField('Enter username of your member for whom you want to see the report',[Length(min=1, max=100), InputRequired()])
 
 
 
 @app.route('/viewProgress', methods = ['GET','POST'])
+@is_logged_in
+@is_trainer
+
 def viewprogress():
     form = ProgressForm(request.form)
     mydb.reconnect()
@@ -944,6 +1057,7 @@ def viewprogress():
     return render_template('progressanimation.html', form = form,list = lists )
 
 @app.route('/attendance/', methods = ['POST','GET'])
+@is_logged_in
 def markattendance():
     if request.method == 'POST':
         # print(request.get_json())
@@ -982,6 +1096,7 @@ def markattendance():
 
 
         except Exception as e:
+            flash('Server issue')
             print(e)
         if session['prof'] == 2:
             return redirect(url_for('trainerdash'))
@@ -998,6 +1113,8 @@ class dateForm(Form):
     date = DateField('Select date for which you want to check attendance', [DataRequired()])
 
 @app.route('/showattendance/', methods=['POST','GET'])
+@is_logged_in
+@is_admin
 def showattendance():
     form = dateForm(request.form)
     if request.method == 'POST':
@@ -1038,6 +1155,7 @@ def showattendance():
 
 
 @app.route("/logout/")
+@is_logged_in
 def logout():
     session["username"] = None
     flash("Successfully Logged out")
