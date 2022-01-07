@@ -1,6 +1,7 @@
 
 import numpy as np
 from flask import Flask, render_template, request, redirect, url_for,session, flash
+from werkzeug.wrappers import response
 from wtforms import validators
 from wtforms.form import Form
 from wtforms.validators import *
@@ -11,6 +12,7 @@ from functools import wraps
 from credentials import *
 from passlib.hash import sha256_crypt
 from datetime import datetime
+
 app = Flask(__name__)
 
 mySql = MySQL(app)
@@ -54,6 +56,16 @@ def is_admin(f):
 			return redirect(url_for('login'))
 	return wrap
 
+def for_both(f):
+	@wraps(f)
+	def wrap(*args, **kwargs):
+		if session['prof'] == 1 or session['prof'] == 3:
+			return f(*args, **kwargs)
+		else:
+			flash('You are probably not an authorised person!!, Are you?')
+			return redirect(url_for('login'))
+	return wrap
+
 def is_recep(f):
 	@wraps(f)
 	def wrap(*args, **kwargs):
@@ -86,6 +98,18 @@ class loginForm(Form):
    
     username = StringField('Username',[InputRequired()])
     password = PasswordField('Password',[DataRequired()])
+
+@app.route('/cult/')
+def cult():
+    return render_template('cult.html')
+
+@app.route('/live/')
+def live():
+    return render_template('live.html')
+
+@app.route('/mind/')
+def mind():
+    return render_template('mind.html')
 
 
 
@@ -140,7 +164,12 @@ def login():
 @is_logged_in
 @is_admin
 def admin():
-    return render_template('dashboard.html')
+    mydb.reconnect()
+    cur = mydb.cursor(buffered=True)
+    cur.execute("SELECT * FROM info WHERE username = %s", [session['username']])
+    result = cur.fetchall()
+    cur.close()
+    return render_template('dashboard.html', result = result)
 
 @app.route('/trainerDashboard')
 @is_logged_in
@@ -169,8 +198,14 @@ def recepdash():
 @is_logged_in
 @is_member
 def memberdash():
+    mydb.reconnect()
+    cur = mydb.cursor()
+    cur.execute("SELECT * FROM info WHERE username = %s", [session['username']])
+    result = cur.fetchall()
+
+    cur.close()
     
-    return render_template('memberdash.html')
+    return render_template('memberdash.html', result = result)
 
 def trainChoice():
 
@@ -321,9 +356,11 @@ def deleteTrainer():
         if not username in Trainerchoices:
             return """Sorry {} this trainer doesn't exist anymore.. Kindly <a href="/addTrainer">add</a> Trainer first""".format(session['username'])
         else:
+            cur.execute("SET FOREIGN_KEY_CHECKS=0;")
             cur.execute("DELETE FROM trainers WHERE username = %s", [username])
             cur.execute("DELETE FROM info WHERE username = %s", [username])
             mydb.commit()
+            cur.execute("SET FOREIGN_KEY_CHECKS=1;")
             cur.close()
             flash(' {} deleted from the list'.format(username))
         if session['prof'] == 1:
@@ -360,8 +397,10 @@ def deleteReceptionalist():
         if not username in Recepchoices:
             return  """Sorry {} Receptionalists list is empty.. Kindly <a href="/addReceptionalist">add</a> Receptionalist first""".format(session['username'])
         else:
+            cur.execute("SET FOREIGN_KEY_CHECKS=0;")
             cur.execute("DELETE FROM receptionalist WHERE username = %s", [username])
             cur.execute("DELETE FROM info WHERE username = %s", [username])
+            cur.execute("SET FOREIGN_KEY_CHECKS=1;")
             mydb.commit()
             cur.close()
             flash("{} removed from receptionalists list".format(username))
@@ -527,8 +566,7 @@ class addPlanForm(Form):
 
 @app.route('/addPlans/', methods = ['POST', 'GET'])
 @is_logged_in
-@is_admin
-@is_recep
+@for_both
 def addPlans():
     form = addPlanForm(request.form)
     if request.method == "POST" and form.validate():
@@ -590,8 +628,7 @@ class addMemberForm(Form):
 
 @app.route('/addMember/', methods = ['GET','POST'])
 @is_logged_in
-@is_admin
-@is_recep
+@for_both
 def addMember():
     form =  addMemberForm(request.form)
     if request.method == "POST" and form.validate():
@@ -637,7 +674,7 @@ class deleteMemberform(Form):
 
 @app.route('/deleteMember', methods = ['GET', 'POST'])
 @is_logged_in
-@is_admin
+@for_both
 def deleteMember():
     form = deleteMemberform(request.form)
     if request.method == "POST" and form.validate():
@@ -812,6 +849,7 @@ def profile():
 
 @app.route('/contactinfo/')
 @is_logged_in
+@is_recep
 def contactdetails():
     mydb.reconnect()
     cur = mydb.cursor()
@@ -1059,6 +1097,7 @@ def viewprogress():
 @app.route('/attendance/', methods = ['POST','GET'])
 @is_logged_in
 def markattendance():
+   
     if request.method == 'POST':
         # print(request.get_json())
         try:
@@ -1085,29 +1124,63 @@ def markattendance():
 
             val = (username,date,time,latitude, longitude)
             print(val,"================955")
+          
             if username in listuser:
                 print("marked",session['prof'])
                 flash("Attendance already marked")
+                print("marked already",session['prof'])
+                
+                if session['prof'] == 2:
+                    return redirect(url_for('trainerdash'))
+                elif session['prof'] == 3:
+                    return redirect(url_for('recepdash'))
+                elif session['prof'] == 4:
+                    return redirect(url_for('memberdash'))
+            
+ 
             else:
+                flash("Attendance Marked... ")
                 cur.execute("INSERT INTO attendance(username, date, time, latitude, longitude) VALUES(%s, %s, %s, %s, %s)", val)
                 mydb.commit()
                 cur.close() 
-                flash("Attendance Marked... ")
+                if session['prof'] == 2:
+                    return redirect(url_for('trainerdash'))
+                elif session['prof'] == 3:
+                    return redirect(url_for('recepdash'))
+                elif session['prof'] == 4:
+                    return redirect(url_for('memberdash'))
+            
+ 
 
 
         except Exception as e:
             flash('Server issue')
             print(e)
-        if session['prof'] == 2:
-            return redirect(url_for('trainerdash'))
-        elif session['prof'] == 3:
-            return redirect(url_for('recepdash'))
-        elif session['prof'] == 4:
-            return redirect(url_for('memberdash'))
+            if session['prof'] == 2:
+                return redirect(url_for('trainerdash'))
+            elif session['prof'] == 3:
+                return redirect(url_for('recepdash'))
+            elif session['prof'] == 4:
+                return redirect(url_for('memberdash'))
        
  
      
     return render_template('attendance.html')
+
+
+
+# @app.route('/attendance/')
+# def markattendance():
+#     # resp = request.get_json()
+#     # print(resp)
+#     url = 'http://freegeoip.net/json/{}'.format(request.remote_addr)
+#     r = requests.get(url)
+
+#     # j = json.loads(r.text())
+#     # city = j['city']
+#     print(r.text)
+#     return "hi"
+#     return render_template('location.html')
 
 class dateForm(Form):
     date = DateField('Select date for which you want to check attendance', [DataRequired()])

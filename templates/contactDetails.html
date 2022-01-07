@@ -1,49 +1,379 @@
 {% extends "layout.html" %}
-
+  
 {% block y %}
-<div class="view details" style="background-color: #bcf2cf">
-    <h1><small>Welcome</small><span class="font-italic font-weight-bold" style="color: #0d5125">
-            {{session.username}}</span></h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+ 
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"
+    integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"
+    integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13"
+    crossorigin="anonymous"></script>
+<link rel="stylesheet" href="/static/css/dashboardui.css">
 
 
-    <div class="form-group">
-        <div class="text-white">
 
 
-            {% for row in result %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>Username|</th>
-                        <th>Name |</th>
-                        <th>Contact Number |</th>
-                        
-                        
-                    </tr>
-                </thead>
-                <tbody>
-                    <TR>
-                        <TD class="c2">{{ row[0] }} </TD>
-                        <TD class="c3">{{row[1]}}</TD>
-                        <TD class="c4"><SPAN>{{row[2]}}</SPAN></TD>
-                      
-                        <br>
-                    </TR>
 
+ 
+</head>
+<body>
+    
 
-                </tbody>
-            </table>
+    <!-- ============================================navbar==================================================== -->
+    <nav class="navbar navbar-expand-lg navbar-light border shadow-lg  "
+    style="width: 100%;">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">
+            <img src="https://static.cure.fit/assets/images/curefit-v-man.svg" alt="">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+            data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+            aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+       
+        <div class="collapse navbar-collapse row" id="navbarSupportedContent">
+            <ul class="navbar-nav  mt-2 justify-content-center">
+                <li class="nav-item ms-3">
+                    <a class="nav-link " aria-current="page" href="/cult"><img
+                            src="https://img.icons8.com/material-outlined/30s/000000/running.png" />cult
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#"><img
+                            src="https://img.icons8.com/windows/30/000000/camera--v1.png" /> Live
+                    </a>
+                </li>
 
-            {% endfor %}
-            <br>
-            <button onclick="history.back()">
-                Click here to go back
-            </button>
-            </form>
+                <li class="nav-item">
+                    <a class="nav-link" href="#"> <img
+                            src="https://img.icons8.com/external-vitaliy-gorbachev-fill-vitaly-gorbachev/30/000000/external-yoga-health-vitaliy-gorbachev-fill-vitaly-gorbachev.png" />
+                        Mind
+                    </a>
+                </li>
+            
+
+                <li class="nav-item">
+                  <a class="nav-link " href="/logout"><img
+                      src="https://img.icons8.com/external-bearicons-detailed-outline-bearicons/30/000000/external-login-call-to-action-bearicons-detailed-outline-bearicons-1.png" />
+                    Logout</a>
+      
+                </li>
+            </ul>
 
         </div>
+    </div>
+
+
+</nav>
+
+
+<!-- <div class="bg-image" style="background-image: url('https://wallpapercave.com/wp/wp8834081.jpg'); background-repeat: no-repeat; background-position: center center; background-size: cover; width: 100%;"> -->
+  <div class="mainDiv  d-flex p-3" style="background-color: whitesmoke; ">
+    <div class="left ">
+        <!-- upar -->
+        <div class="side shadow-lg justify-content-center align-content-center mb-2 " style="height: 10rem;
+        background-color: whitesmoke;
+        width: 18rem;
+        border-radius: 25px;
+        text-align: center;">
+          <div class="profile">
+            <img src="https://img.icons8.com/dotty/80/000000/gender-neutral-user.png" />
+
+            <a href="{{url_for('profile')}}">View Profile</a>
+            
+
+          </div>
+          
+          <p> Name:- {{session.username}}</p>
+          <a href="{{url_for('editprofile')}}">Edit Profile</a>
+
+
+        </div>
+        <!-- niche -->
+
+        <div class="down  bg-white p-3 justify-content-center align-content-center" style="width: 18rem; font-family: 'BrandonTextWeb-Regular'; border-radius: 25px;">
+            {%if session['prof'] == 1%}
+            <ol class="down-list ">
+              <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                 ATTENDANCE
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                  <li><a class="dropdown-item" href="{{url_for('showattendance')}}">VIEW</a></li>
+                 
+                  
+                </ul>
+              </div><br>
+              <div class="dropdown gap-5">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                  TRAINER
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                  <li><a class="dropdown-item" href="{{url_for('addTrainer')}}">ADD</a></li>
+                  <li><a class="dropdown-item" href="{{url_for('deleteTrainer')}}">DELETE</a></li>
+                
+                </ul>
+              </div><br>
+              <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                  RECEPTIONIST
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                  <li><a class="dropdown-item" href="{{url_for('addReceptionalist')}}">ADD</a></li>
+                  <li><a class="dropdown-item" href="{{url_for('deleteReceptionalist')}}">DELETE</a></li>
+                  
+                </ul>
+              </div><br>
+              <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                  EQUIPMENTS
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                  <li><a class="dropdown-item" href="{{url_for('addEquipment')}}">ADD</a></li>
+                  <li><a class="dropdown-item" href="{{url_for('removeEquipments')}}">DELETE</a></li>
+                  <li><a class="dropdown-item" href="{{url_for('viewEquip')}}">VIEWS</a></li>
+                </ul>
+              </div><br>
+              <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                  PLANS
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                  <li><a class="dropdown-item" href="{{url_for('addPlans')}}">ADD</a></li>
+                  <li><a class="dropdown-item" href="{{url_for('delplans')}}">DELETE</a></li>
+                  <li><a class="dropdown-item" href="{{url_for('viewplans')}}">VIEWS</a></li>
+                </ul>
+              </div><br>
+              <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                 MEMBERS
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                  <li><a class="dropdown-item" href="{{url_for('addMember')}}">ADD</a></li>
+                  <li><a class="dropdown-item" href="{{url_for('deleteMember')}}">DELETE</a></li>
+                  
+                </ul>
+              </div><br>
+              <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                 DETAILS
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                  <li><a class="dropdown-item" href="{{url_for('details')}}">VIEWS</a></li>
+                 
+                  
+                </ul>
+              </div>
+            </ol>
+            {%elif session['prof'] == 2%}
+            <ol class="down-list ">
+              <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                 HOME PAGE
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                  <li><a class="dropdown-item" href="{{url_for('home')}}">VIEW</a></li>
+                 
+                  
+                </ul>
+              </div><br>
+              <div class="dropdown gap-5">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                  ATTENDANCE
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                  <li><a class="dropdown-item" href="{{url_for('markattendance')}}">Mark Your Attendance</a></li>
+                
+                </ul>
+              </div><br>
+              <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                  PASSWORD
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                  <li><a class="dropdown-item" href="{{url_for('changepass')}}">Change Password</a></li>
+                  
+                </ul>
+              </div><br>
+              <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                  EQUIPMENTS
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+  
+                  <li><a class="dropdown-item" href="{{url_for('viewEquip')}}">VIEW</a></li>
+                </ul>
+              </div><br>
+              <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                  PLANS
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+            
+                  <li><a class="dropdown-item" href="{{url_for('viewplans')}}">VIEWS</a></li>
+                </ul>
+              </div><br>
+              <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                YOUR MEMBERS
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                  <li><a class="dropdown-item" href="{{url_for('membersinfo')}}">Info</a></li>
+                  
+                </ul>
+              </div><br>
+              <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                 REPORT
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                  <li><a class="dropdown-item" href="{{url_for('updateDailyReport')}}">Update Exercise Details of your members</a></li>
+                  <li><a class="dropdown-item" href="{{url_for('progressupdate')}}">Update Progress info of your members</a></li>
+                  <li><a class="dropdown-item" href="{{url_for('viewprogress')}}">View Member's Progress</a></li>
+                  
+                </ul>
+              </div><br>
+            
+           
+            </ol>
+            {%else%}
+            <ol class="down-list ">
+              <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                 HOME PAGE
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                  <li><a class="dropdown-item" href="{{url_for('home')}}">VIEW</a></li>
+                 
+                  
+                </ul>
+              </div><br>
+              <div class="dropdown gap-5">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                  ATTENDANCE
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                  <li><a class="dropdown-item" href="{{url_for('markattendance')}}">Mark Your Attendance</a></li>
+                
+                </ul>
+              </div><br>
+              <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                  PASSWORD
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                  <li><a class="dropdown-item" href="{{url_for('changepass')}}">Change Password</a></li>
+                  
+                </ul>
+              </div><br>
+              <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                  EQUIPMENTS
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+  
+                  <li><a class="dropdown-item" href="{{url_for('viewEquip')}}">VIEW</a></li>
+                </ul>
+              </div><br>
+              <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                  PLANS
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+            
+                  <li><a class="dropdown-item" href="{{url_for('viewplans')}}">VIEWS</a></li>
+                </ul>
+              </div><br>
+              <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                MEMBERS
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                  <li><a class="dropdown-item" href="{{url_for('addMember')}}">Add</a></li>
+                  <li><a class="dropdown-item" href="{{url_for('deleteMember')}}">Delete</a></li>
+                  
+                </ul>
+              </div><br>
+              <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                 CONTACT DETAILS
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                  <li><a class="dropdown-item" href="{{url_for('contactdetails')}}">Contact info's of everyone</a></li>
+                
+                </ul>
+              </div><br>
+            
+           
+            </ol>
+            {%endif%}
+          </div>
+         
+    </div>
+
+            
+    <div class="col-md-4 p-5 w-50">
+      <div class="text-black" >
+
+          <table class="table table-bordered text-black" style="background-color: whitesmoke;">
+      
+              <thead style="background-color: rgb(113, 155, 65);">
+                  <tr>
+                    <th> Username </th>
+                    <th> Name </th>
+                    <th>Contact Info</th>
+                
+                  </tr>
+  
+              </thead>
+         
+              {% for row in result %}
+              <tbody>
+                  <tr>
+                    <TD class="c3">{{ row[0] }} </TD>
+                    <TD class="c3">{{ row[1] }} </TD>
+                    <TD class="c3">{{row[2]}}</TD>
+             
+                    
+                  </tr>
+
+
+              </tbody>
+              {% endfor %}
+          </table>
+    
+          
+          <br>
+          
+
+          <button onclick="history.back()">
+              Click here to go back
+          </button>
+          </form>
+
+      </div>
+
+
+</div>
+</div>
+
+</div>
 
 
 
 
-        {% endblock %}
+</body>
+</html>
+{% endblock %}
+
+

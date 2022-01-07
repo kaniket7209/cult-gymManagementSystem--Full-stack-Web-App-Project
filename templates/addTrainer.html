@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Dashboard</title>
  
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
@@ -17,35 +17,20 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"
     integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13"
     crossorigin="anonymous"></script>
-  <script src="/static/js/fit.js"></script>
+<link rel="stylesheet" href="/static/css/dashboardui.css">
 
 
 
 
-  <style>
-    .btn{
-        background: linear-gradient(to right, #00ff00 0%, #ffff66 100%);
-            color: black;
-            border-radius: 3rem;
-          }
-          body{
-              background-color: whitesmoke;
-          }
-      @media screen and (max-width: 600px) {
-          .mainDiv{
-              flex-direction: column;
-          }
-      }
 
-     
-  </style>
+ 
 </head>
 <body>
     
 
     <!-- ============================================navbar==================================================== -->
-    <nav class="navbar navbar-expand-lg navbar-light border shadow-1  "
-    style="width: 100%; background:linear-gradient(skyblue,#ffea00) ">
+    <nav class="navbar navbar-expand-lg navbar-light border shadow-lg  "
+    style="width: 100%;">
     <div class="container-fluid">
         <a class="navbar-brand" href="/">
             <img src="https://static.cure.fit/assets/images/curefit-v-man.svg" alt="">
@@ -55,11 +40,11 @@
             aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <h1>welcome {{session.username}}</h1>
+       
         <div class="collapse navbar-collapse row" id="navbarSupportedContent">
             <ul class="navbar-nav  mt-2 justify-content-center">
                 <li class="nav-item ms-3">
-                    <a class="nav-link " aria-current="page" href="#"><img
+                    <a class="nav-link " aria-current="page" href="/cult"><img
                             src="https://img.icons8.com/material-outlined/30s/000000/running.png" />cult
                     </a>
                 </li>
@@ -92,8 +77,8 @@
 </nav>
 
 
-<div class="bg-image" style="background-image: url('https://wallpapercave.com/wp/wp8834081.jpg'); background-repeat: no-repeat; background-position: center center; background-size: cover; width: 100%;">
-  <div class="mainDiv  d-flex p-3">
+<!-- <div class="bg-image" style="background-image: url('https://wallpapercave.com/wp/wp8834081.jpg'); background-repeat: no-repeat; background-position: center center; background-size: cover; width: 100%;"> -->
+  <div class="mainDiv  d-flex p-3" style="background-color: whitesmoke; ">
     <div class="left ">
         <!-- upar -->
         <div class="side shadow-lg justify-content-center align-content-center mb-2 " style="height: 10rem;

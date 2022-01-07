@@ -1,8 +1,28 @@
 .btn{
-    z-index: 3;
-    background-color: skyblue;
-    border-radius: 1rem;
-    color: white;
-    font-weight: bold;
     
+    background-color: skyblue;
+     border-radius: 1rem;
+     color: white;
+     font-weight: bold;
+   }
+   body{
+       background-color: whitesmoke;
+   }
+@media screen and (max-width: 600px) {
+   .mainDiv{
+       flex-direction: column;
+   }
+}
+.navbar{
+background: linear-gradient(45deg,skyblue,#ffea00);
+}
+/* .down{
+width: 18rem; 
+font-family: 'BrandonTextWeb-Regular'; 
+border-radius: 25px;
+background-color: whitesmoke;
+} */
+a{
+font-weight: bold;
+color: black;
 }
