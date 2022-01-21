@@ -14,18 +14,10 @@ from datetime import datetime
 app = Flask(__name__)
 
 
-# mydb = mysql.connector.connect(
-# host="localhost",
-# port = 3306,
-# user="root",
-# password= "",  
-# database = "gymdatabase", 
 
-# )
 
-# For deployment 
 mydb = mysql.connector.connect(
-host="postgres://thzrgaszmlwadk:76020cd3ddc7f8c413d359b9b9c62002c873b195e75023e61a54088989e58a93@ec2-3-222-49-168.compute-1.amazonaws.com:5432/d5igsck5no18o0",
+host="localhost", # replace with "Database url for deployment"
 port = 3306,
 user="root",
 password= "",  
