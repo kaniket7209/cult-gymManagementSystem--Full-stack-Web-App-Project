@@ -17,7 +17,7 @@ app = Flask(__name__)
 
 
 mydb = mysql.connector.connect(
-host="localhost", # replace with "Database url for deployment"
+host="pep-gym-management-system.herokuapp.com", # replace with "Database url for deployment"
 port = 3306,
 user="root",
 password= "",  
