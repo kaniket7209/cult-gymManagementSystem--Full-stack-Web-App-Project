@@ -1,21 +1,18 @@
 
 import numpy as np
 from flask import Flask, render_template, request, redirect, url_for,session, flash
-from werkzeug.wrappers import response
 from wtforms import validators
 from wtforms.form import Form
 from wtforms.validators import *
-from flask_mysqldb import MySQL
 import mysql.connector
 from wtforms.fields import *
 from functools import wraps
 from credentials import *
-from passlib.hash import sha256_crypt
+from passlib.hash import pbkdf2_sha256
 from datetime import datetime
 
 app = Flask(__name__)
 
-mySql = MySQL(app)
 
 mydb = mysql.connector.connect(
 host="localhost",
@@ -117,48 +114,45 @@ def mind():
 def login():
     form = loginForm(request.form)
     if request.method == "POST":
-        try:
-            username = form.username.data
-            password_candidate = form.password.data
-            mydb.reconnect()
-            cur = mydb.cursor()
-            cur.execute('SELECT * FROM info WHERE username = %s', [username])
-            result = cur.fetchone()
-            # print(result,"-----line 52")
-            # result = cur.fetchall()
-            
-            
-            name = result[0]
-            # data = cur.fetchone()
-            # admin_name = result[0]
-            password = result[1]
-            # hash = sha256_crypt.hash(password)
-            # print(password, "---------",  hash) #store hash in data base inspite of original password
-
-            # print(password,"--line 56")
-
-            if username == name and sha256_crypt.verify(password_candidate, password):
-                session['logged_in'] = True # for middle ware
-                session['username']=username
-                session['prof']=result[3] #profession
-                
-                flash('You are logged in')
-                if session['prof'] == 1:
-                    return redirect(url_for('admin'))
-                elif session['prof'] == 2:
-                    return redirect(url_for('trainerdash'))
-                elif session['prof'] == 3:
-                    return redirect(url_for('recepdash'))
-                elif session['prof'] == 4:
-                    return redirect(url_for('memberdash'))
-
-            else:
-                flash('Username or Password entered is incorrect')
+        username = form.username.data
+        password = form.password.data
+        print(username, "--",password)
+        #Uncomment below two lines if you are running it for a first time 
+        # hash = pbkdf2_sha256.hash(password)
+        # print(hash,"--------121")
+        if mydb:
+              try:
+                cur = mydb.cursor()
+                cur.execute("SELECT username, password, prof FROM info WHERE username = %s",[username])
+                result = cur.fetchall()
+                # print(result)
+                cur.close()
+                adminusername = result[0][0]
+                adminpassword = result[0][1]
+                print(adminusername, adminpassword)
+                if username == adminusername and pbkdf2_sha256.verify(password, adminpassword):
+                    session['username'] = username
+                    session['logged_in'] = True # for middle ware
+                    session['prof'] = result[0][2]
+                    flash("You are logged in")
+                    if session['prof'] == 1:
+                        return redirect(url_for('admin'))
+                    elif session['prof'] == 2:
+                        return redirect(url_for('trainerdash'))
+                    elif session['prof'] == 3:
+                        return redirect(url_for('recepdash'))
+                    elif session['prof'] == 4:
+                        return redirect(url_for('memberdash'))
+                else:
+                      flash('Username or Password entered is incorrect')
+                      return redirect(url_for('login'))
+              except Exception as e:
+                flash("Username or Password entered is incorrect")
                 return redirect(url_for('login'))
-            cur.close()
-        except Exception:
-            flash("Username or Password entered is incorrect")
-    return render_template("login.html", form = form)
+        else:
+              return " DB not connected"
+
+    return render_template('login.html', form = form)
 
 @app.route('/admin')
 @is_logged_in
@@ -246,7 +240,7 @@ def addTrainer():
     if request.method == 'POST' and form.validate():
         name = form.name.data
         username = form.username.data
-        password = sha256_crypt.encrypt(str(form.password.data))
+        password = pbkdf2_sha256.encrypt(str(form.password.data))
         street = form.street.data
         city = form.city.data
         phone = form.phone.data
@@ -260,7 +254,7 @@ def addTrainer():
       
         
         cur.close()
-        mydb.close()
+        mydb.close() 
         flash('You recruited a new Trainer!!', 'success')
         if session['prof'] == 1:
             return redirect(url_for('admin'))
@@ -307,7 +301,7 @@ def addReceptionalist():
     if request.method == 'POST' and form.validate():
         name = form.name.data
         username = form.username.data
-        password = sha256_crypt.encrypt(str(form.password.data))
+        password = pbkdf2_sha256.encrypt(str(form.password.data))
         street = form.street.data
         city = form.city.data
         phone = form.phone.data
@@ -634,7 +628,7 @@ def addMember():
     if request.method == "POST" and form.validate():
         name = form.name.data
         username = form.username.data
-        password = sha256_crypt.encrypt(str(form.password.data))
+        password = pbkdf2_sha256.encrypt(str(form.password.data))
         street = form.street.data
         city = form.city.data
         phone= form.phone.data
@@ -820,7 +814,7 @@ class changepasswordForm(Form):
 def changepass():
     form = changepasswordForm(request.form)
     if request.method == 'POST' and form.validate():
-        password = sha256_crypt.encrypt(str(form.password.data))
+        password = pbkdf2_sha256.encrypt(str(form.password.data))
         mydb.reconnect()
         cur = mydb.cursor()
         cur.execute("UPDATE info SET password = %s WHERE username = %s ",(password,session['username']))
@@ -1128,7 +1122,7 @@ def markattendance():
             if username in listuser:
                 print("marked",session['prof'])
                 flash("Attendance already marked")
-                print("marked already",session['prof'])
+             
                 
                 if session['prof'] == 2:
                     return redirect(url_for('trainerdash'))
@@ -1147,7 +1141,7 @@ def markattendance():
                     return redirect(url_for('trainerdash'))
                 elif session['prof'] == 3:
                     return redirect(url_for('recepdash'))
-                elif session['prof'] == 4:
+                elif session['prof'] == 4: 
                     return redirect(url_for('memberdash'))
             
  
@@ -1162,25 +1156,13 @@ def markattendance():
                 return redirect(url_for('recepdash'))
             elif session['prof'] == 4:
                 return redirect(url_for('memberdash'))
-       
+        
  
      
     return render_template('attendance.html')
 
 
 
-# @app.route('/attendance/')
-# def markattendance():
-#     # resp = request.get_json()
-#     # print(resp)
-#     url = 'http://freegeoip.net/json/{}'.format(request.remote_addr)
-#     r = requests.get(url)
-
-#     # j = json.loads(r.text())
-#     # city = j['city']
-#     print(r.text)
-#     return "hi"
-#     return render_template('location.html')
 
 class dateForm(Form):
     date = DateField('Select date for which you want to check attendance', [DataRequired()])

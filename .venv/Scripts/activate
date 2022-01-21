@@ -37,7 +37,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="C:\Users\User\Desktop\gymManagementSystem--Fullstack-WebApp-master\.venv"
+VIRTUAL_ENV="C:\Users\Win10\Desktop\cult-gymManagementSystem--Full-stack-Web-App-Project-main\.venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"

@@ -375,12 +375,12 @@
     <div>
       <!-- {% from "includes/formhelpers.html" import render_field %} -->
       <form class="p-5 w-50" style="border: 2px solid black; border-radius: 2rem; margin: auto; background-color: whitesmoke;" action="" method="POST">
-        <h1><span >Please mark your attendance</span></h1>
+       
          
-         <p>Click the button </p>
-         <a href="{{url_for('profile')}}">Go back</a>
+         <p>Click the button to mark your attendance and go back</p>
          
         </form>
+        <a href="{{url_for('profile')}}"><button>GO BACK</button> </a>
         <div>
          <button type="submit" class="btn btn-primary" name = "loc" value="Submit" onclick="getLocation()">Mark Attendance</button>
           <!-- <button  class="btn btn-primary" name="loc" onclick="getLocation()">Mark Attendance</button> -->
