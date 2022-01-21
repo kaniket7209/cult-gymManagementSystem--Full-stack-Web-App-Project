@@ -7,7 +7,6 @@ from wtforms.validators import *
 import mysql.connector
 from wtforms.fields import *
 from functools import wraps
-from credentials import *
 from passlib.hash import pbkdf2_sha256
 from datetime import datetime
 
@@ -17,7 +16,7 @@ app = Flask(__name__)
 
 
 mydb = mysql.connector.connect(
-host="pep-gym-management-system.herokuapp.com", # replace with "Database url for deployment"
+host="localhost", # replace with "Database url for deployment"
 port = 3306,
 user="root",
 password= "",  
