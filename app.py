@@ -17,7 +17,7 @@ from sqlalchemy.pool import QueuePool
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "dev-secret-change-me")
 
-db_url = os.getenv("DATABASE_URL")
+db_url = os.getenv("DATABASE_URL", "mysql://root:LBdUoYVfIxeaTtJsXGtvtmFmXbIWkZJD@yamanote.proxy.rlwy.net:47665/railway")
 
 if db_url:
     # Example: mysql://USER:PASSWORD@HOST:PORT/DBNAME
