@@ -9,7 +9,8 @@ from wtforms.form import Form
 from wtforms.validators import *
 from wtforms.fields import *
 from passlib.hash import pbkdf2_sha256
-
+import mysql.connector
+from urllib.parse import urlparse
 from sqlalchemy import create_engine, text
 from sqlalchemy.pool import QueuePool
 
@@ -17,27 +18,26 @@ app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "dev-secret-change-me")
 
 db_url = os.getenv("DATABASE_URL")
-if not db_url:
-    # Local dev fallback
-    DB_HOST = os.getenv("DB_HOST", "localhost")
-    DB_PORT = os.getenv("DB_PORT", "3306")
-    DB_USER = os.getenv("DB_USER", "root")
-    DB_PASS = os.getenv("DB_PASS", "")
-    DB_NAME = os.getenv("DB_NAME", "gymdatabase")
-    db_url = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
-if db_url.startswith("mysql://"):
-    db_url = db_url.replace("mysql://", "mysql+pymysql://", 1)
-
-engine = create_engine(
-    db_url,
-    poolclass=QueuePool,
-    pool_size=5,
-    max_overflow=5,
-    pool_pre_ping=True,
-    pool_recycle=280,
-    future=True,
-)
+if db_url:
+    # Example: mysql://USER:PASSWORD@HOST:PORT/DBNAME
+    parsed = urlparse(db_url)
+    mydb = mysql.connector.connect(
+        host=parsed.hostname,
+        port=parsed.port or 3306,
+        user=parsed.username,
+        password=parsed.password,
+        database=parsed.path.lstrip('/'),
+    )
+else:
+    # local fallback (same as before)
+    mydb = mysql.connector.connect(
+        host="localhost",
+        port=3306,
+        user="root",
+        password="",
+        database="gymdatabase",
+    )
 
 # Simple helpers so you can keep your raw SQL strings
 def query_all(sql: str, params: dict | None = None):
