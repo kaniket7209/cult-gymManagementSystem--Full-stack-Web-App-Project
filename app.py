@@ -1095,78 +1095,80 @@ def viewprogress():
             return redirect(url_for('viewprogress'))
     return render_template('progressanimation.html', form = form,list = lists )
 
-@app.route('/attendance/', methods = ['POST','GET'])
+@app.route('/attendance/', methods=['POST', 'GET'])
 @is_logged_in
 def markattendance():
-   
-    if request.method == 'POST':
-        # print(request.get_json())
-        try:
-            location = request.get_json()
-            latitude = location["latitude"]
-            longitude = location["longitude"]
-            username = session['username']
-            print(username, location,"------------940")
-            now = datetime.now()
-            dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
-            date = dt_string.split(" ")[0]
-            time = dt_string.split(" ")[1]
-            print(latitude, longitude,username, date, time)
-            mydb.reconnect()
-            cur =  mydb.cursor()
-            # for checking entries
-            # =============
-            cur.execute("SELECT username, date FROM attendance WHERE date = %s ",[date])
-            checklist = cur.fetchall()
-            print(checklist,"--951")
-            # =============
-            listuser = [row[0] for row in checklist]
-            print(listuser, "===========954")
+    # GET just renders the page
+    if request.method == 'GET':
+        return render_template('attendance.html')
 
-            val = (username,date,time,latitude, longitude)
-            print(val,"================955")
-          
-            if username in listuser:
-                print("marked",session['prof'])
-                flash("Attendance already marked")
-             
-                
-                if session['prof'] == 2:
-                    return redirect(url_for('trainerdash'))
-                elif session['prof'] == 3:
-                    return redirect(url_for('recepdash'))
-                elif session['prof'] == 4:
-                    return redirect(url_for('memberdash'))
-            
- 
-            else:
-                flash("Attendance Marked... ")
-                cur.execute("INSERT INTO attendance(username, date, time, latitude, longitude) VALUES(%s, %s, %s, %s, %s)", val)
-                mydb.commit()
-                cur.close() 
-                if session['prof'] == 2:
-                    return redirect(url_for('trainerdash'))
-                elif session['prof'] == 3:
-                    return redirect(url_for('recepdash'))
-                elif session['prof'] == 4: 
-                    return redirect(url_for('memberdash'))
-            
- 
+    # POST (mark attendance)
+    try:
+        # accept JSON OR form (so JS/curl both work)
+        data = request.get_json(silent=True) or {}
+        latitude  = data.get("latitude")  or request.form.get("latitude")
+        longitude = data.get("longitude") or request.form.get("longitude")
 
+        # must be logged in (session set by your login)
+        username = session.get('username')
+        if not username:
+            # since @is_logged_in should block anyway, this is just a safety guard
+            flash("Please login")
+            return redirect(url_for('login'))
 
-        except Exception as e:
-            flash('Server issue')
-            print(e)
+        if not latitude or not longitude:
+            flash("Missing coordinates")
+            # redirect back to the right dashboard for your role
             if session['prof'] == 2:
                 return redirect(url_for('trainerdash'))
             elif session['prof'] == 3:
                 return redirect(url_for('recepdash'))
             elif session['prof'] == 4:
                 return redirect(url_for('memberdash'))
-        
- 
-     
-    return render_template('attendance.html')
+            else:
+                return redirect(url_for('admin'))
+
+        # build date/time strings like your original code (dd/mm/YYYY)
+        now = datetime.now()
+        dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+        date = dt_string.split(" ")[0]
+        time = dt_string.split(" ")[1]
+
+        mydb.reconnect()
+        cur = mydb.cursor()
+
+        # Use an upsert so you don't need to SELECT first and you avoid PK collisions
+        cur.execute("""
+            INSERT INTO attendance (username, date, time, latitude, longitude)
+            VALUES (%s, %s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE time=VALUES(time), latitude=VALUES(latitude), longitude=VALUES(longitude)
+        """, (username, date, time, str(latitude), str(longitude)))
+        mydb.commit()
+        cur.close()
+
+        flash("Attendance Marked..." if cur.rowcount > 0 else "Attendance already marked")
+
+        # redirect according to role (also handle admin=1 to be safe)
+        if session['prof'] == 2:
+            return redirect(url_for('trainerdash'))
+        elif session['prof'] == 3:
+            return redirect(url_for('recepdash'))
+        elif session['prof'] == 4:
+            return redirect(url_for('memberdash'))
+        else:
+            return redirect(url_for('admin'))
+
+    except Exception as e:
+        print("ATTENDANCE ERROR:", e)
+        flash('Server issue')
+        if session.get('prof') == 2:
+            return redirect(url_for('trainerdash'))
+        elif session.get('prof') == 3:
+            return redirect(url_for('recepdash'))
+        elif session.get('prof') == 4:
+            return redirect(url_for('memberdash'))
+        else:
+            return redirect(url_for('admin'))
 
 
 
