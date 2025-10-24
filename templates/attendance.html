@@ -411,7 +411,7 @@
                     latitude: position.coords.latitude,
                     longitude: position.coords.longitude
                 };
-                fetch(`http://127.0.0.1:5000/attendance/`, {
+                fetch(`/attendance/`, {
                     method: "POST",
                     credentials: "include",
                     body: JSON.stringify(location),
