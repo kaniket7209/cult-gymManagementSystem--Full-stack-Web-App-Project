@@ -11,50 +11,20 @@ from wtforms.fields import *
 from passlib.hash import pbkdf2_sha256
 import mysql.connector
 from urllib.parse import urlparse
-from sqlalchemy import create_engine, text
-from sqlalchemy.pool import QueuePool
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "dev-secret-change-me")
 
 db_url = os.getenv("DATABASE_URL", "mysql://root:LBdUoYVfIxeaTtJsXGtvtmFmXbIWkZJD@yamanote.proxy.rlwy.net:47665/railway")
+parsed = urlparse(db_url)
 
-if db_url:
-    # Example: mysql://USER:PASSWORD@HOST:PORT/DBNAME
-    parsed = urlparse(db_url)
-    mydb = mysql.connector.connect(
-        host=parsed.hostname,
-        port=parsed.port or 3306,
-        user=parsed.username,
-        password=parsed.password,
-        database=parsed.path.lstrip('/'),
-    )
-else:
-    # local fallback (same as before)
-    mydb = mysql.connector.connect(
-        host="localhost",
-        port=3306,
-        user="root",
-        password="",
-        database="gymdatabase",
-    )
-
-# Simple helpers so you can keep your raw SQL strings
-def query_all(sql: str, params: dict | None = None):
-    with engine.connect() as conn:
-        res = conn.execute(text(sql), params or {})
-        return [dict(row._mapping) for row in res]
-
-def query_one(sql: str, params: dict | None = None):
-    with engine.connect() as conn:
-        row = conn.execute(text(sql), params or {}).fetchone()
-        return dict(row._mapping) if row else None
-
-def execute_sql(sql: str, params: dict | None = None):
-    # INSERT/UPDATE/DELETE
-    with engine.begin() as conn:
-        res = conn.execute(text(sql), params or {})
-        return res.rowcount
+mydb = mysql.connector.connect(
+    host=parsed.hostname,
+    port=parsed.port or 3306,
+    user=parsed.username,
+    password=parsed.password,
+    database=parsed.path.lstrip('/'),
+)
 
 
 def is_logged_in(f):
