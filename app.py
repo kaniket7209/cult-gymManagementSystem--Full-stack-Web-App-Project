@@ -114,49 +114,52 @@ def mind():
 
 
 
-@app.route("/login", methods = ["POST","GET"])
+@app.route("/login", methods=["POST", "GET"])
 def login():
     form = loginForm(request.form)
     if request.method == "POST":
-        username = form.username.data
-        password = form.password.data
-        print(username, "--",password)
-        #Uncomment below two lines if you are running it for a first time 
-        # hash = pbkdf2_sha256.hash(password)
-        # print(hash,"--------121")
-        if mydb:
-              try:
-                cur = mydb.cursor()
-                cur.execute("SELECT username, password, prof FROM info WHERE username = %s",[username])
-                result = cur.fetchall()
-                # print(result)
-                cur.close()
-                adminusername = result[0][0]
-                adminpassword = result[0][1]
-                print(adminusername, adminpassword)
-                if username == adminusername and pbkdf2_sha256.verify(password, adminpassword):
-                    session['username'] = username
-                    session['logged_in'] = True # for middle ware
-                    session['prof'] = result[0][2]
-                    flash("You are logged in")
-                    if session['prof'] == 1:
-                        return redirect(url_for('admin'))
-                    elif session['prof'] == 2:
-                        return redirect(url_for('trainerdash'))
-                    elif session['prof'] == 3:
-                        return redirect(url_for('recepdash'))
-                    elif session['prof'] == 4:
-                        return redirect(url_for('memberdash'))
-                else:
-                      flash('Username or Password entered is incorrect')
-                      return redirect(url_for('login'))
-              except Exception as e:
-                flash("Username or Password entered is incorrect")
-                return redirect(url_for('login'))
-        else:
-              return " DB not connected"
+        # Read from WTForms if present; otherwise fallback to raw names.
+        username = (getattr(form, "username", None).data if hasattr(form, "username") else None) \
+                   or request.form.get("username") or request.form.get("uname") or request.form.get("user")
+        password = (getattr(form, "password", None).data if hasattr(form, "password") else None) \
+                   or request.form.get("password") or request.form.get("pass") or request.form.get("pwd")
 
-    return render_template('login.html', form = form)
+        if username: username = username.strip()
+
+        if not username or not password:
+            flash("Please enter username and password")
+            return redirect(url_for("login"))
+
+        try:
+            cur = mydb.cursor()
+            cur.execute("SELECT username, password, prof FROM info WHERE username = %s", (username,))
+            row = cur.fetchone()
+            cur.close()
+
+            if row and pbkdf2_sha256.verify(password, row[1]):
+                session['username'] = row[0]
+                session['logged_in'] = True
+                session['prof'] = row[2]
+                flash("You are logged in")
+
+                if session['prof'] == 1:
+                    return redirect(url_for('admin'))
+                elif session['prof'] == 2:
+                    return redirect(url_for('trainerdash'))
+                elif session['prof'] == 3:
+                    return redirect(url_for('recepdash'))
+                elif session['prof'] == 4:
+                    return redirect(url_for('memberdash'))
+
+            flash('Username or Password entered is incorrect')
+            return redirect(url_for('login'))
+
+        except Exception as e:
+            print("LOGIN ERROR:", e)
+            flash("Username or Password entered is incorrect")
+            return redirect(url_for('login'))
+
+    return render_template('login.html', form=form)
 
 @app.route('/admin')
 @is_logged_in
