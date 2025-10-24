@@ -1,28 +1,61 @@
-
+import os
 import numpy as np
-from flask import Flask, render_template, request, redirect, url_for,session, flash
+from datetime import datetime
+from functools import wraps
+
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 from wtforms import validators
 from wtforms.form import Form
 from wtforms.validators import *
-import mysql.connector
 from wtforms.fields import *
-from functools import wraps
 from passlib.hash import pbkdf2_sha256
-from datetime import datetime
+
+from sqlalchemy import create_engine, text
+from sqlalchemy.pool import QueuePool
 
 app = Flask(__name__)
+app.secret_key = os.getenv("SECRET_KEY", "dev-secret-change-me")
 
+db_url = os.getenv("DATABASE_URL")
+if not db_url:
+    # Local dev fallback
+    DB_HOST = os.getenv("DB_HOST", "localhost")
+    DB_PORT = os.getenv("DB_PORT", "3306")
+    DB_USER = os.getenv("DB_USER", "root")
+    DB_PASS = os.getenv("DB_PASS", "")
+    DB_NAME = os.getenv("DB_NAME", "gymdatabase")
+    db_url = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
+if db_url.startswith("mysql://"):
+    db_url = db_url.replace("mysql://", "mysql+pymysql://", 1)
 
-
-mydb = mysql.connector.connect(
-host="localhost", # replace with "Database url for deployment"
-port = 3306,
-user="root",
-password= "",  
-database = "gymdatabase", 
-
+engine = create_engine(
+    db_url,
+    poolclass=QueuePool,
+    pool_size=5,
+    max_overflow=5,
+    pool_pre_ping=True,
+    pool_recycle=280,
+    future=True,
 )
+
+# Simple helpers so you can keep your raw SQL strings
+def query_all(sql: str, params: dict | None = None):
+    with engine.connect() as conn:
+        res = conn.execute(text(sql), params or {})
+        return [dict(row._mapping) for row in res]
+
+def query_one(sql: str, params: dict | None = None):
+    with engine.connect() as conn:
+        row = conn.execute(text(sql), params or {}).fetchone()
+        return dict(row._mapping) if row else None
+
+def execute_sql(sql: str, params: dict | None = None):
+    # INSERT/UPDATE/DELETE
+    with engine.begin() as conn:
+        res = conn.execute(text(sql), params or {})
+        return res.rowcount
+
 
 def is_logged_in(f):
 	@wraps(f)
